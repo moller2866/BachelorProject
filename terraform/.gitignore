@@ -1,0 +1,7 @@
+azurek8s
+main.tfplan
+
+.terraform.lock.hcl
+.terraform
+
+secrets.sh
