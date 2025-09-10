@@ -3,5 +3,6 @@ main.tfplan
 
 .terraform.lock.hcl
 .terraform
+*.tfstate*
 
 secrets.sh

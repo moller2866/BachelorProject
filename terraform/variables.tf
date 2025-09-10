@@ -13,7 +13,7 @@ variable "resource_group_name" {
 variable "node_count" {
   type        = number
   description = "The initial quantity of nodes for the node pool."
-  default     = 1
+  default     = 2
 }
 
 variable "username" {
