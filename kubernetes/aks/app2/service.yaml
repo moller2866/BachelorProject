@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aspire-test-app2
+  namespace: aspire2
+  labels:
+    app: aspire-test-app2
+    metrics-scrape: "true"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    prometheus.io/path: "/metrics"
+spec:
+  selector:
+    app: aspire-test-app2
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
