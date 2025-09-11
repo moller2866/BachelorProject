@@ -1,0 +1,19 @@
+# Example extra datasources for Grafana (if using separate grafana chart)
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        isDefault: true
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway.loki-testing.svc.cluster.local
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        url: http://jaeger-ui.observability.svc.cluster.local:16686

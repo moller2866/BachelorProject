@@ -1,0 +1,50 @@
+# values override for kube-prometheus-stack
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+    retention: 3d
+    resources: {}
+
+# We'll rely on a label 'metrics-scrape: "true"' across services
+
+additionalServiceMonitors:
+  - name: aspire-apps
+    namespace: monitoring
+    selector:
+      matchLabels:
+        metrics-scrape: "true"
+    namespaceSelector:
+      any: true
+    endpoints:
+      - port: http
+        path: /metrics
+        interval: 30s
+        scrapeTimeout: 10s
+        relabelings:
+          - action: replace
+            sourceLabels: [__meta_kubernetes_namespace]
+            targetLabel: namespace
+          - action: replace
+            sourceLabels: [__meta_kubernetes_pod_node_name]
+            targetLabel: node
+
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  service:
+    type: ClusterIP
+  adminPassword: admin
+  sidecar:
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: true
+
+alertmanager:
+  enabled: false
+
+prometheusOperator:
+  resources: {}
