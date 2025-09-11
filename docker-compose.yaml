@@ -1,0 +1,35 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.99.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "8888:8888" # collector metrics
+    depends_on: [jaeger, loki]
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    ports:
+      - "16686:16686" # Jaeger UI
+
+  loki:
+    image: grafana/loki:3.0.0
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.retention.time=1d
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"
+    depends_on: [prometheus, jaeger, loki]
