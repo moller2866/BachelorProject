@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireTestApp", "aspire_test_app\AspireTestApp.csproj", "{D4C08899-382A-EC0A-9DD3-28EAA225ED5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4C08899-382A-EC0A-9DD3-28EAA225ED5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4C08899-382A-EC0A-9DD3-28EAA225ED5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4C08899-382A-EC0A-9DD3-28EAA225ED5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4C08899-382A-EC0A-9DD3-28EAA225ED5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {540D9951-BC8C-4FFA-A5E7-0A2AB0786CBA}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,10 @@
+**/bin
+**/obj
+*.user
+*.swp
+*.log
+.nuget
+.git
+.gitignore
+Dockerfile
+README.md
