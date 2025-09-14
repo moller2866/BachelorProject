@@ -1,0 +1,20 @@
+server:
+  http_listen_port: 9009
+
+blocks_storage:
+  backend: s3
+  s3:
+    endpoint: minio-standalone:9000
+    bucket_name: mimir
+    access_key_id: minio
+    secret_access_key: minio123
+    insecure: true
+  tsdb:
+    dir: /tmp/mimir/tsdb
+
+ingester:
+  ring:
+    kvstore:
+      store: inmemory
+    replication_factor: 1
+
