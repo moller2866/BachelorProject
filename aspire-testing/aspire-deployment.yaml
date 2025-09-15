@@ -1,0 +1,90 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aspire-testing
+  namespace: aspire-test-sig
+  labels: 
+    app: aspire-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aspire-testing
+  template:
+    metadata:
+      labels:
+        app: aspire-testing
+    spec:
+      containers:
+      - name: aspire-testing
+        image: moller2866/aspire-test-app
+        ports:
+        - containerPort: 80
+        env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://aspire-dashboard:18889"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aspire-testing
+  namespace: aspire-test-sig
+  labels: 
+    app: aspire-testing
+spec:
+  selector:
+    app: aspire-testing
+  ports:
+    - port: 8080
+      targetPort: 80
+      name: http
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aspire-dashboard
+  namespace: aspire
+  labels:
+    app: aspire-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aspire-dashboard
+  template:
+    metadata:
+      labels:
+        app: aspire-dashboard
+    spec:
+      containers:
+      - name: aspire-dashboard
+        image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+        ports:
+        - containerPort: 18888
+        - containerPort: 18889
+        env:
+        - name: DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS
+          value: "true"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aspire-dashboard
+  namespace: aspire
+  labels:
+    app: aspire-dashboard
+spec:
+  selector:
+    app: aspire-dashboard
+  ports:
+    - port: 18888
+      targetPort: 18888
+      name: dashboard
+    - port: 4317
+      targetPort: 18889
+      name: otlp
+  type: LoadBalancer

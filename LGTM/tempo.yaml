@@ -5,11 +5,15 @@ distributor:
   receivers:
     otlp:
       protocols:
-        grpc:
         http:
+          endpoint: "0.0.0.0:3201"
 
 storage:
   trace:
-    backend: local
-    local:
-      path: /tmp/tempo/traces
+    backend: s3
+    s3:
+      endpoint: minio-standalone:9000
+      bucket: tempo
+      access_key: minio
+      secret_key: minio123
+      insecure: true 

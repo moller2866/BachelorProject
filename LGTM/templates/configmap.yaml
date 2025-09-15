@@ -1,0 +1,10 @@
+{{- $root := . -}}
+{{- range $name, $svc := dict "alloy" $root.Values.alloy "mimir" $root.Values.mimir "loki" $root.Values.loki "tempo" $root.Values.tempo }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-config
+data:
+  {{ $name }}.yaml: |-
+    {{- (.Files.Get $svc.config) | nindent 4 }}
+{{- end }}

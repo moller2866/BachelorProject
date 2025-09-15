@@ -1,0 +1,29 @@
+aspireApp:
+  image: aspire-app
+  port: 8080
+  otelEndpoint: "http://alloy:4317"
+
+alloy:
+  image: grafana/alloy:latest
+  config: alloy-config.alloy
+
+mimir:
+  image: grafana/mimir:latest
+  config: mimir.yaml
+  port: 9009
+
+loki:
+  image: grafana/loki:latest
+  config: loki.yaml
+  port: 3100
+
+tempo:
+  image: grafana/tempo:latest
+  config: tempo.yaml
+  port: 3200
+
+grafana:
+  image: grafana/grafana:latest
+  adminUser: admin
+  adminPassword: admin
+  port: 3000
