@@ -1,0 +1,50 @@
+{{- $root := . -}}
+
+{{- range $name, $svc := dict "aspire-app" $root.Values.aspireApp "alloy" $root.Values.alloy "mimir" $root.Values.mimir "loki" $root.Values.loki "tempo" $root.Values.tempo "grafana" $root.Values.grafana }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: {{ $svc.image }}
+          {{- if eq $name "aspire-app" }}
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ $svc.otelEndpoint }}
+          ports:
+            - containerPort: {{ $svc.port }}
+          {{- else if or (eq $name "mimir") (eq $name "loki") (eq $name "tempo") (eq $name "grafana") }}
+          ports:
+            - containerPort: {{ $svc.port }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/{{ $name }}/
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $name }}-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+spec:
+  selector:
+    app: {{ $name }}
+  ports:
+    - protocol: TCP
+      port: {{ $svc.port }}
+      targetPort: {{ $svc.port }}
+{{- end }}

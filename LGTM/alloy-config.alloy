@@ -1,0 +1,62 @@
+﻿otelcol.receiver.otlp "from_aspire" {
+  grpc { endpoint = "0.0.0.0:4317" } //could be omitted as these values are the default
+  http { endpoint = "0.0.0.0:4318" }
+  output {
+    logs    = [otelcol.processor.batch.default.input]
+    traces  = [otelcol.processor.batch.default.input]
+  }
+}
+
+//Compress data using batcher, in order to reduce network trafic
+otelcol.processor.batch "default" {
+  output {
+    logs    = [otelcol.exporter.loki.default.input]
+    traces  = [otelcol.exporter.otlphttp.to_tempo.input]
+  }
+}
+
+//METRICS
+prometheus.scrape "aspire_scraper" {
+  targets = [
+    {
+    "__address__" = "aspire-app:8080",
+    },
+  ]
+  forward_to = [prometheus.remote_write.aspire_metrics.receiver]
+}
+
+prometheus.remote_write "aspire_metrics"{
+  endpoint {
+    url = "http://mimir:9009/api/v1/push"
+    headers = {
+      "X-Scope-OrgID" = "tenant1",
+    }
+  }
+}
+
+//LOGS
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.to_loki.receiver]
+}
+
+loki.write "to_loki" {
+  endpoint{
+    url = "http://loki:3100/loki/api/v1/push" 
+    headers = {
+      "X-Scope-OrgID" = "tenant1",
+    }
+  }
+}
+
+otelcol.exporter.otlphttp "to_tempo" {
+  client {
+    endpoint = "http://tempo:3201" //target distributer container to write to tempo
+    headers = {
+      "X-Scope-OrgID" = "tenant1",
+    }
+    tls {
+      insecure = true
+      insecure_skip_verify = true
+    }
+  }
+}

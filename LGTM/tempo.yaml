@@ -1,0 +1,19 @@
+﻿server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: "0.0.0.0:3201"
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      endpoint: minio-standalone:9000
+      bucket: tempo
+      access_key: minio
+      secret_key: minio123
+      insecure: true 
