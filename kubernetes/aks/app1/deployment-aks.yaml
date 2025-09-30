@@ -39,3 +39,5 @@ spec:
               value: http://otel-collector-opentelemetry-collector.observability:4317
             - name: OTEL_SERVICE_NAME
               value: aspire-test-api
+            - name: ENABLE_SWAGGER
+              value: "true"

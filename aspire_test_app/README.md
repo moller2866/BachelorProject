@@ -1,32 +1,59 @@
-# Aspire Test App (Standalone)
+# Aspire Test App
 
-Simple .NET 8 minimal API to experiment with telemetry, resilience and Prometheus scraping without an Aspire AppHost.
+Refactored .NET 8 minimal API showcasing OpenTelemetry (traces, metrics, logs) with a clean composition root.
+
+## Structure
+
+```
+Models/                  Domain records (TodoItem, NewTodo)
+Services/                Abstractions & implementations (ITodoRepository, InMemoryTodoRepository)
+Endpoints/               Endpoint mapping extensions (Todo, Simulation, Health)
+Extensions/              Cross-cutting concerns (Observability, Exception handling)
+Program.cs               Composition only
+```
 
 ## Endpoints
 
-- GET / -> basic info
-- GET /todos -> list
-- GET /todos/{id}
-- POST /todos { "title": "X" }
-- POST /simulate/external-call -> calls httpbin with resilient HttpClient
-- GET /simulate/failure -> throws exception (trace + 500)
-- GET /health/live
-- GET /health/ready
-- GET /metrics -> Prometheus scrape (OpenTelemetry exporter)
+| Area       | Endpoint                     | Description                       |
+| ---------- | ---------------------------- | --------------------------------- |
+| Root       | GET /                        | Basic info                        |
+| Todos      | GET /todos                   | List todos                        |
+| Todos      | GET /todos/{id}              | Get by id                         |
+| Todos      | POST /todos                  | Create (JSON { "title": "X" })    |
+| Simulation | POST /simulate/external-call | Outbound call (traces resiliency) |
+| Simulation | GET /simulate/failure        | Throws exception (error tracing)  |
+| Health     | GET /health/live             | Liveness probe                    |
+| Health     | GET /health/ready            | Readiness probe                   |
+| Metrics    | GET /metrics                 | Prometheus scrape                 |
 
-## Resilience
+## Observability
 
-Configured `AddStandardResilienceHandler()` on named HttpClient `remote` (retry, circuit breaker, timeout, etc.).
+Implemented in `Extensions/ObservabilityExtensions.cs`:
 
-## Telemetry
+- Logs, traces, metrics via OpenTelemetry
+- OTLP exporter endpoint configured by `OTEL_EXPORTER_OTLP_ENDPOINT` (default `http://otel-collector:4317`)
+- Prometheus exporter (scrape `/metrics`)
+- Resource attributes include `deployment.environment` and service name from `OTEL_SERVICE_NAME`
 
-OpenTelemetry Metrics & Traces with instrumentations:
+Custom meter: `AspireTestApp.Custom`, counter: `todos_created`.
 
-- ASP.NET Core, HTTP, Runtime
-- Custom meter: `AspireTestApp.Custom` counter `todos_created`
-- Prometheus exporter middleware exposes /metrics
+## Exception Handling
 
-## Run
+Unified JSON envelope via `UseSimpleJsonExceptionHandler()`; errors return:
+
+```
+{ "error": "<message>" }
+```
+
+## Adding a New Feature
+
+1. Add models (if needed) under `Models/`.
+2. Define interfaces / services under `Services/`.
+3. Create an endpoint extension: `Endpoints/FeatureEndpoints.cs` with `MapFeatureEndpoints`.
+4. Call the mapper in `Program.cs`.
+5. Register services (e.g., `builder.Services.AddSingleton<IFoo, Foo>();`).
+
+## Running
 
 ```
 dotnet run --project AspireTestApp.csproj --urls http://localhost:5199
@@ -34,24 +61,17 @@ dotnet run --project AspireTestApp.csproj --urls http://localhost:5199
 
 ## Prometheus Scrape Example
 
-Add to prometheus.yml:
-
 ```
 scrape_configs:
   - job_name: 'aspire_test_app'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:5199'] # adjust if running elsewhere
+      - targets: ['host.docker.internal:5199']
 ```
-
-If Prometheus runs on the same host outside Docker, you can use `localhost:5199`.
-
-## Grafana
-
-Import Prometheus as a data source, then build panels using metrics (search for `aspire_test_api` resource attributes or `todos_created`).
 
 ## Next Ideas
 
-- Add OTLP exporter for traces to Tempo/Jaeger.
-- Expose readiness probe logic.
-- Add histogram instruments for latency.
+- Persist todos (EF Core / LiteDB) behind `ITodoRepository`.
+- Add request logging & correlation IDs.
+- Introduce API versioning groups.
+- Add histogram instruments for latency & queue length.
