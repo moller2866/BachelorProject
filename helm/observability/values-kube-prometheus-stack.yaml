@@ -13,7 +13,7 @@ prometheus:
 
 additionalServiceMonitors:
   - name: aspire-apps
-    namespace: monitoring
+    namespace: observability
     selector:
       matchLabels:
         metrics-scrape: "true"

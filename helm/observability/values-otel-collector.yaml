@@ -23,7 +23,7 @@ config:
       tls:
         insecure: true
     loki:
-      endpoint: http://loki-gateway.loki-testing.svc.cluster.local/loki/api/v1/push
+      endpoint: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
       tls:
         insecure: true
       headers:
