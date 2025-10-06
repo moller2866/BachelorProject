@@ -1,0 +1,28 @@
+# Copy this file to terraform.tfvars and customize the values
+
+# Basic Configuration
+resource_group_name = "rg-observability-demo"
+location           = "westeurope"
+
+# AKS Configuration
+aks_cluster_name = "observability-demo-aks"
+node_count       = 3  # Adjust based on your needs (you had 2)
+node_vm_size     = "standard_b2pls_v2"
+
+# Storage Configuration
+# Note: Storage account names must be globally unique (3-24 characters, lowercase letters and numbers only)
+storage_account_name = "saobservabilitydemo"  # Change this to be unique
+
+# Azure AD Application
+app_display_name = "observability"
+
+# Kubernetes Configuration
+kubernetes_namespace = "observability"
+service_account_name = "observability"
+
+# Tags
+common_tags = {
+  Environment = "Demo"
+  ManagedBy   = "Terraform"
+  Project     = "Observability"
+}
