@@ -1,0 +1,27 @@
+{
+  "id": null,
+  "uid": "example-dashboard",
+  "title": "My Example Dashboard",
+  "tags": [],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Example CPU Usage",
+      "targets": [
+        {
+          "expr": "process_cpu_seconds_total",
+          "legendFormat": "CPU",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Mimir"
+      }
+    }
+  ]
+}

@@ -6,11 +6,21 @@ datasources:
     access: proxy
     url: http://mimir:9009/prometheus
     isDefault: true
+    jsonData:
+      httpHeaderName1: "X-Scope-OrgID"
+      prometheusType: "Mimir"
+      prometheusVersion: "2.9.1"
+    secureJsonData:
+      httpHeaderValue1: "tenant-a"
 
   - name: Loki
     type: loki
     access: proxy
     url: http://loki:3100
+    jsonData:
+      httpHeaderName1: "X-Scope-OrgID"
+    secureJsonData:
+      httpHeaderValue1: "tenant-a"
 
   - name: Tempo
     type: tempo
@@ -25,3 +35,6 @@ datasources:
         datasourceUid: Mimir
       serviceMap:
         datasourceUid: Tempo
+      httpHeaderName1: "X-Scope-OrgID"
+    secureJsonData:
+      httpHeaderValue1: "tenant-a"
