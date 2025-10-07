@@ -40,27 +40,45 @@ resource "kubernetes_secret" "canary_basic_auth" {
   }
 }
 
+resource "azurerm_storage_container" "loki_chunks" {
+  name                  = "loki-chunk-bucket"
+  storage_account_name  = var.storage_account_name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "loki_ruler" {
+  name                  = "loki-ruler-bucket"
+  storage_account_name  = var.storage_account_name
+  container_access_type = "private"
+}
+
+locals {
+  loki_values = templatefile("${path.module}/loki-values.yaml.tpl", {
+    storage_account_name        = var.storage_account_name
+    loki_chunk_container        = azurerm_storage_container.loki_chunks.name
+    loki_ruler_container        = azurerm_storage_container.loki_ruler.name
+    service_account_name        = var.service_account_name
+    workload_identity_client_id = var.workload_identity_client_id
+  })
+}
+
 # Add Grafana Helm repository
 resource "helm_release" "loki" {
   name       = "loki"
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki"
   namespace  = var.namespace
-  version    = "5.47.2" # Specify version for consistency
+  version    = "6.42.0" # Specify version for consistency
 
   values = [
-    templatefile("${path.module}/loki-values.yaml.tpl", {
-      storage_account_name        = var.storage_account_name
-      loki_chunk_container        = var.loki_chunk_container
-      loki_ruler_container        = var.loki_ruler_container
-      service_account_name        = var.service_account_name
-      workload_identity_client_id = var.workload_identity_client_id
-    })
+    local.loki_values
   ]
 
   depends_on = [
     kubernetes_secret.loki_basic_auth,
-    kubernetes_secret.canary_basic_auth
+    kubernetes_secret.canary_basic_auth,
+    azurerm_storage_container.loki_chunks,
+    azurerm_storage_container.loki_ruler
   ]
 }
 

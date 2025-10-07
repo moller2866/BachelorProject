@@ -73,11 +73,13 @@ module "storage" {
 module "workload_identity" {
   source = "./modules/workload-identity"
 
-  app_display_name     = var.app_display_name
-  aks_oidc_issuer_url  = module.aks.oidc_issuer_url
-  namespace            = var.kubernetes_namespace
-  service_account_name = var.service_account_name
-  storage_account_id   = module.storage.storage_account_id
+  app_display_name           = var.app_display_name
+  aks_oidc_issuer_url        = module.aks.oidc_issuer_url
+  namespace                  = var.kubernetes_namespace
+  service_account_name_loki  = var.service_account_name_loki
+  service_account_name_mimir = var.service_account_name_mimir
+  service_account_name_tempo = var.service_account_name_tempo
+  storage_account_id         = module.storage.storage_account_id
 
   depends_on = [module.aks]
 }
@@ -114,9 +116,52 @@ module "loki" {
 
   namespace                   = kubernetes_namespace.observability.metadata[0].name
   storage_account_name        = module.storage.storage_account_name
-  loki_chunk_container        = module.storage.loki_chunk_container_name
-  loki_ruler_container        = module.storage.loki_ruler_container_name
-  service_account_name        = var.service_account_name
+  service_account_name        = var.service_account_name_loki
+  workload_identity_client_id = module.workload_identity.app_application_id
+
+  depends_on = [
+    kubernetes_namespace.observability,
+    module.workload_identity
+  ]
+}
+
+# OpenTelemetry Collector Deployment
+module "otel_collector" {
+  source = "./modules/otel-collector"
+
+  namespace        = kubernetes_namespace.observability.metadata[0].name
+  helm_values_file = "${path.root}/modules/otel-collector/otel-collector-values.yaml"
+
+  depends_on = [
+    kubernetes_namespace.observability,
+    module.loki,
+    module.mimir,
+    module.tempo
+  ]
+}
+
+# Mimir Deployment
+module "mimir" {
+  source = "./modules/mimir"
+
+  namespace                   = kubernetes_namespace.observability.metadata[0].name
+  storage_account_name        = module.storage.storage_account_name
+  service_account_name        = var.service_account_name_mimir
+  workload_identity_client_id = module.workload_identity.app_application_id
+
+  depends_on = [
+    kubernetes_namespace.observability,
+    module.workload_identity
+  ]
+}
+
+# Tempo Deployment
+module "tempo" {
+  source = "./modules/tempo"
+
+  namespace                   = kubernetes_namespace.observability.metadata[0].name
+  storage_account_name        = module.storage.storage_account_name
+  service_account_name        = var.service_account_name_tempo
   workload_identity_client_id = module.workload_identity.app_application_id
 
   depends_on = [

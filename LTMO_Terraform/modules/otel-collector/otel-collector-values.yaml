@@ -1,0 +1,68 @@
+# OpenTelemetry Collector Helm values (to be filled later)
+
+mode: deployment
+
+presets:
+  logsCollection:
+    enabled: false
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.99.0
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+  processors:
+    batch:
+      send_batch_size: 512
+      timeout: 5s
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 15
+    resource:
+      attributes:
+        - key: cluster
+          action: upsert
+          value: ltmo
+        - key: region
+          action: upsert
+          from_attribute: topology.kubernetes.io/region
+        - key: zone
+          action: upsert
+          from_attribute: topology.kubernetes.io/zone
+  exporters:
+    loki:
+      endpoint: loki-gateway.svc.cluster.local/loki/api/v1/push
+      tls:
+        insecure: true
+      headers:
+        X-Scope-OrgID: tenant1
+    prometheusremotewrite:
+      endpoint: mimir.observability.svc.cluster.local:9009/api/v1/push
+
+    otlp/tempo:
+      endpoint: tempo-distributor.observability.svc.cluster.local:4317
+      tls:
+        insecure: true
+  service:
+    telemetry:
+      metrics:
+        address: 0.0.0.0:8889
+    pipelines:
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, resource, batch]
+        exporters: [loki]
+      metrics:
+        receivers: [otlp, prometheus]
+        processors: [memory_limiter, resource, batch]
+        exporters: [prometheusremotewrite]
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, resource, batch]
+        exporters: [otlp/tempo]

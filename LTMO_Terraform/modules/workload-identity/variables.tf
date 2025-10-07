@@ -13,8 +13,18 @@ variable "namespace" {
   type        = string
 }
 
-variable "service_account_name" {
-  description = "Kubernetes service account name"
+variable "service_account_name_loki" {
+  description = "Kubernetes service account name for Loki"
+  type        = string
+}
+
+variable "service_account_name_mimir" {
+  description = "Kubernetes service account name for Mimir"
+  type        = string
+}
+
+variable "service_account_name_tempo" {
+  description = "Kubernetes service account name for Tempo"
   type        = string
 }
 

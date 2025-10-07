@@ -19,13 +19,11 @@ variable "aks_cluster_name" {
 variable "node_count" {
   description = "Number of nodes in the AKS cluster"
   type        = number
-  default     = 3
 }
 
 variable "node_vm_size" {
   description = "VM size for AKS nodes"
   type        = string
-  default     = "standard_b2pls_v2"
 }
 
 variable "storage_account_name" {
@@ -52,18 +50,22 @@ variable "service_account_name" {
   default     = "observability"
 }
 
-variable "loki_username" {
-  description = "Username for Loki basic authentication"
+variable "service_account_name_loki" {
+  description = "Name of the Kubernetes service account for Loki"
   type        = string
   default     = "loki"
-  sensitive   = true
 }
 
-variable "loki_password" {
-  description = "Password for Loki basic authentication"
+variable "service_account_name_mimir" {
+  description = "Name of the Kubernetes service account for Mimir"
   type        = string
-  default     = "admin"
-  sensitive   = true
+  default     = "mimir"
+}
+
+variable "service_account_name_tempo" {
+  description = "Name of the Kubernetes service account for Tempo"
+  type        = string
+  default     = "tempo"
 }
 
 variable "common_tags" {

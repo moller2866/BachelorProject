@@ -1,4 +1,4 @@
-resource "azurerm_storage_account" "loki" {
+resource "azurerm_storage_account" "observability" {
   name                     = var.storage_account_name
   resource_group_name      = var.resource_group_name
   location                 = var.location
@@ -10,16 +10,4 @@ resource "azurerm_storage_account" "loki" {
   }
 
   tags = var.tags
-}
-
-resource "azurerm_storage_container" "loki_chunks" {
-  name                  = "loki-chunk-bucket"
-  storage_account_name  = azurerm_storage_account.loki.name
-  container_access_type = "private"
-}
-
-resource "azurerm_storage_container" "loki_ruler" {
-  name                  = "loki-ruler-bucket"
-  storage_account_name  = azurerm_storage_account.loki.name
-  container_access_type = "private"
 }

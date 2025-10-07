@@ -33,6 +33,7 @@ output "loki_gateway_ip" {
   value       = module.loki.gateway_external_ip
 }
 
+# Add the missing Loki authentication outputs
 output "loki_username" {
   description = "Username for Loki basic auth"
   value       = module.loki.loki_username
@@ -43,4 +44,32 @@ output "loki_password" {
   description = "Password for Loki basic auth"
   value       = module.loki.loki_password
   sensitive   = true
+}
+
+# OpenTelemetry Collector outputs
+output "otel_collector_service" {
+  description = "OpenTelemetry Collector service name"
+  value       = module.otel_collector.service_name
+}
+
+# Mimir outputs
+output "mimir_distributor_service" {
+  description = "Mimir distributor service name"
+  value       = module.mimir.distributor_service_name
+}
+
+output "mimir_blocks_container" {
+  description = "Mimir blocks storage container"
+  value       = module.mimir.blocks_container_name
+}
+
+# Tempo outputs
+output "tempo_distributor_service" {
+  description = "Tempo distributor service name"
+  value       = module.tempo.distributor_service_name
+}
+
+output "tempo_traces_container" {
+  description = "Tempo traces storage container"
+  value       = module.tempo.traces_container_name
 }

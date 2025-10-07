@@ -58,13 +58,13 @@ serviceAccount:
 deploymentMode: Distributed
 
 ingester:
-  replicas: 3
+  replicas: 2
   zoneAwareReplication:
     enabled: false
 
 querier:
-  replicas: 3
-  maxUnavailable: 2
+  replicas: 2
+  maxUnavailable: 1
 
 queryFrontend:
   replicas: 2
@@ -74,8 +74,8 @@ queryScheduler:
   replicas: 2
 
 distributor:
-  replicas: 3
-  maxUnavailable: 2
+  replicas: 2
+  maxUnavailable: 1
 
 compactor:
   replicas: 1
@@ -112,6 +112,10 @@ lokiCanary:
           key: username
 
 minio:
+  enabled: false
+memcached:
+  enabled: false
+chunks-cache:
   enabled: false
 
 backend:
