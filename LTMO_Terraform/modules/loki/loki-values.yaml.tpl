@@ -56,6 +56,7 @@ serviceAccount:
     "azure.workload.identity/use": "true"
 
 deploymentMode: Distributed
+auth_enabled: false
 
 ingester:
   replicas: 2
@@ -90,26 +91,7 @@ ruler:
 
 gateway:
   service:
-    type: LoadBalancer
-  basicAuth:
-    enabled: true
-    existingSecret: loki-basic-auth
-
-lokiCanary:
-  extraArgs:
-    - -pass=$(LOKI_PASS)
-    - -user=$(LOKI_USER)
-  extraEnv:
-    - name: LOKI_PASS
-      valueFrom:
-        secretKeyRef:
-          name: canary-basic-auth
-          key: password
-    - name: LOKI_USER
-      valueFrom:
-        secretKeyRef:
-          name: canary-basic-auth
-          key: username
+    type: ClusterIP
 
 minio:
   enabled: false
