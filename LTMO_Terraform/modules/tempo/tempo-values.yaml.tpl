@@ -54,6 +54,7 @@ querier:
 # Query Frontend configuration
 queryFrontend:
   enabled: true
+  http_listen_port: 3200
 
 # Gateway configuration (for tempo-distributed)
 gateway:
@@ -107,6 +108,15 @@ config: |
         path: /var/tempo/blocks
   memberlist:
     bind_port: 7946
+    join_members:
+      - tempo-gossip-ring
 
 serviceMonitor:
   enabled: false
+
+gossipRing:
+  service:
+    ports:
+      - name: gossip
+        port: 7946
+        protocol: UDP

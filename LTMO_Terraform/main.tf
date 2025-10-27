@@ -69,7 +69,7 @@ module "storage" {
   tags = var.common_tags
 }
 
-# Workload Identity Setup
+# Workload Identity Setup, needed for creating federated access tokens for accessing storage
 module "workload_identity" {
   source = "./modules/workload-identity"
 
