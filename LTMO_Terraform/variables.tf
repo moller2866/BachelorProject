@@ -78,7 +78,6 @@ variable "common_tags" {
   }
 }
 
-# Ingress Configuration
 variable "ingress_install_nginx_controller" {
   description = "Whether to install NGINX Ingress Controller via Helm"
   type        = bool
@@ -107,4 +106,10 @@ variable "ingress_tls_secret_name" {
   description = "Name of the Kubernetes secret containing TLS certificate (required if ingress_enable_tls is true)"
   type        = string
   default     = "observability-tls"
+}
+
+variable "grafana_api_key" {
+  type        = string
+  description = "Grafana API key with admin or editor permissions"
+  sensitive   = true
 }

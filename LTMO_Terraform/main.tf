@@ -25,6 +25,10 @@ terraform {
     time = {
       source  = "hashicorp/time"
       version = "~> 0.9"
+    grafana = {
+      source  = "grafana/grafana"
+      version = "~> 2.6"
+      }
     }
   }
 }
@@ -199,4 +203,28 @@ module "ingress" {
     module.mimir,
     module.tempo
   ]
+}
+# Grafana provisioning
+provider "grafana" {
+  url = "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+  auth = var.grafana_api_key
+}
+
+resource "grafana_data_source" "loki" {
+  name = "Loki"
+  type = "loki"
+  url  = "http://loki.observability.svc.cluster.local:3100"
+  is_default = false
+}
+
+resource "grafana_data_source" "tempo" {
+  name = "Tempo"
+  type = "tempo"
+  url  = "http://tempo.observability.svc.cluster.local:3100"
+}
+
+resource "grafana_data_source" "mimir" {
+  name = "Mimir"
+  type = "prometheus"
+  url  = module.loki.loki_url
 }

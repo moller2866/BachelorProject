@@ -47,3 +47,6 @@ ingress_enable_tls = false
 # Name of the Kubernetes secret containing TLS certificate
 # (Only used if ingress_enable_tls = true)
 ingress_tls_secret_name = "observability-tls"
+
+# API key for grafana provisioning, needs admin access.
+grafana_api_key = "KEY_VALUE_HERE"
