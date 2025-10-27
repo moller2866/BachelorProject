@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
@@ -167,5 +171,32 @@ module "tempo" {
   depends_on = [
     kubernetes_namespace.observability,
     module.workload_identity
+  ]
+}
+
+# Ingress for Unified Access to Observability Services
+module "ingress" {
+  source = "./modules/ingress"
+
+  namespace                = kubernetes_namespace.observability.metadata[0].name
+  ingress_class_name       = var.ingress_class_name
+  host                     = var.ingress_host
+  enable_tls               = var.ingress_enable_tls
+  tls_secret_name          = var.ingress_tls_secret_name
+  install_nginx_controller = var.ingress_install_nginx_controller
+
+  # Service configuration
+  loki_service_name  = "${module.loki.release_name}-gateway"
+  loki_service_port  = 80
+  mimir_service_name = "${module.mimir.release_name}-nginx"
+  mimir_service_port = 80
+  tempo_service_name = "${module.tempo.release_name}-gateway"
+  tempo_service_port = 80
+
+  depends_on = [
+    kubernetes_namespace.observability,
+    module.loki,
+    module.mimir,
+    module.tempo
   ]
 }

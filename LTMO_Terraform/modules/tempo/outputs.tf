@@ -12,3 +12,8 @@ output "traces_container_name" {
   description = "Name of the Tempo traces container"
   value       = azurerm_storage_container.tempo_traces.name
 }
+
+output "release_name" {
+  description = "Name of the Helm release"
+  value       = helm_release.tempo.name
+}

@@ -77,3 +77,34 @@ variable "common_tags" {
     Project     = "Observability"
   }
 }
+
+# Ingress Configuration
+variable "ingress_install_nginx_controller" {
+  description = "Whether to install NGINX Ingress Controller via Helm"
+  type        = bool
+  default     = true
+}
+
+variable "ingress_class_name" {
+  description = "Name of the IngressClass to use for the observability ingress"
+  type        = string
+  default     = "nginx"
+}
+
+variable "ingress_host" {
+  description = "Optional hostname for the ingress (if using DNS). Leave empty for IP-based access"
+  type        = string
+  default     = ""
+}
+
+variable "ingress_enable_tls" {
+  description = "Enable TLS/HTTPS for the ingress"
+  type        = bool
+  default     = false
+}
+
+variable "ingress_tls_secret_name" {
+  description = "Name of the Kubernetes secret containing TLS certificate (required if ingress_enable_tls is true)"
+  type        = string
+  default     = "observability-tls"
+}

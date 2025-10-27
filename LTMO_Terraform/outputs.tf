@@ -73,3 +73,40 @@ output "tempo_traces_container" {
   description = "Tempo traces storage container"
   value       = module.tempo.traces_container_name
 }
+
+# Unified Ingress outputs
+output "ingress_ip" {
+  description = "LoadBalancer IP address for the unified observability ingress"
+  value       = module.ingress.ingress_ip
+}
+
+output "ingress_host" {
+  description = "Hostname configured for the ingress (if any)"
+  value       = module.ingress.ingress_host
+}
+
+output "loki_url" {
+  description = "URL to access Loki via the unified ingress"
+  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}/loki"
+}
+
+output "mimir_url" {
+  description = "URL to access Mimir (Prometheus-compatible) via the unified ingress"
+  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir" : "http://${module.ingress.ingress_ip}/mimir"
+}
+
+output "tempo_url" {
+  description = "URL to access Tempo via the unified ingress"
+  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}/tempo"
+}
+
+output "ingress_endpoints_summary" {
+  description = "Summary of all unified ingress endpoints"
+  value = {
+    ingress_ip   = module.ingress.ingress_ip
+    ingress_host = module.ingress.ingress_host
+    loki_path    = "/loki"
+    mimir_path   = "/mimir"
+    tempo_path   = "/tempo"
+  }
+}

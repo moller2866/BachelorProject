@@ -12,3 +12,8 @@ output "blocks_container_name" {
   description = "Name of the Mimir blocks container"
   value       = azurerm_storage_container.mimir_blocks.name
 }
+
+output "release_name" {
+  description = "Name of the Helm release"
+  value       = helm_release.mimir.name
+}

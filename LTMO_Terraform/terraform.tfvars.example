@@ -26,3 +26,24 @@ common_tags = {
   ManagedBy   = "Terraform"
   Project     = "Observability"
 }
+
+# Ingress Configuration
+# Set to false if you already have an NGINX Ingress Controller in your cluster
+ingress_install_nginx_controller = true
+
+# IngressClass to use (default: nginx)
+ingress_class_name = "nginx"
+
+# Optional: Set a custom hostname for the ingress
+# Leave empty ("") for IP-based access
+ingress_host = ""
+# Example with custom domain:
+# ingress_host = "observability.yourdomain.com"
+
+# TLS/HTTPS Configuration
+# Set to true to enable HTTPS (requires ingress_host to be set)
+ingress_enable_tls = false
+
+# Name of the Kubernetes secret containing TLS certificate
+# (Only used if ingress_enable_tls = true)
+ingress_tls_secret_name = "observability-tls"
