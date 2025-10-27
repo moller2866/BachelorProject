@@ -48,5 +48,6 @@ ingress_enable_tls = false
 # (Only used if ingress_enable_tls = true)
 ingress_tls_secret_name = "observability-tls"
 
+
 # API key for grafana provisioning, needs admin access.
 grafana_api_key = "KEY_VALUE_HERE"

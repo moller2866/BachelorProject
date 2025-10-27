@@ -25,13 +25,14 @@ terraform {
     time = {
       source  = "hashicorp/time"
       version = "~> 0.9"
+    }
     grafana = {
       source  = "grafana/grafana"
       version = "~> 2.6"
-      }
     }
   }
 }
+
 
 provider "azurerm" {
   features {}
@@ -213,18 +214,18 @@ provider "grafana" {
 resource "grafana_data_source" "loki" {
   name = "Loki"
   type = "loki"
-  url  = "http://loki.observability.svc.cluster.local:3100"
+  url  = "http://${module.ingress.ingress_host}/loki"
   is_default = false
 }
 
 resource "grafana_data_source" "tempo" {
   name = "Tempo"
   type = "tempo"
-  url  = "http://tempo.observability.svc.cluster.local:3100"
+  url  = "http://${module.ingress.ingress_host}/tempo"
 }
 
 resource "grafana_data_source" "mimir" {
   name = "Mimir"
   type = "prometheus"
-  url  = module.loki.loki_url
+  url  = "http://${module.ingress.ingress_host}/mimir"
 }
