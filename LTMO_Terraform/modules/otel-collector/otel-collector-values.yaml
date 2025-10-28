@@ -24,17 +24,11 @@ config:
       check_interval: 5s
       limit_percentage: 75
       spike_limit_percentage: 15
-    resource:
-      attributes:
-        - key: cluster
-          action: upsert
-          value: ltmo
-        - key: region
-          action: upsert
-          from_attribute: topology.kubernetes.io/region
-        - key: zone
-          action: upsert
-          from_attribute: topology.kubernetes.io/zone
+    resourcedetection/system:
+      # Modify the list of detectors to match the cloud environment
+      detectors: [azure]
+      timeout: 2s
+      override: false
   exporters:
     loki:
       endpoint: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
@@ -59,13 +53,13 @@ config:
     pipelines:
       logs:
         receivers: [otlp]
-        processors: [memory_limiter, resource, batch]
+        processors: [memory_limiter, resourcedetection/system, batch]
         exporters: [loki]
       metrics:
         receivers: [otlp]
-        processors: [memory_limiter, resource, batch]
+        processors: [memory_limiter, resourcedetection/system, batch]
         exporters: [prometheusremotewrite]
       traces:
         receivers: [otlp]
-        processors: [memory_limiter, resource, batch]
+        processors: [memory_limiter, resourcedetection/system, batch]
         exporters: [otlp/tempo]

@@ -6,6 +6,7 @@ provider "registry.terraform.io/grafana/grafana" {
   constraints = "~> 2.6"
   hashes = [
     "h1:Wc49BFJcuEgeYrisjDBgvETQbNkwis8bnQiNIGif2O0=",
+    "h1:XjYARXNAS1YMgABhI5J3RknJbHvh/DjlVOcywc5I5w4=",
     "zh:10e1db6012433e84592cee299e7014deda1d9772f86f0f6f635e9d46543ebf25",
     "zh:2ef424112ff8b6fbd6ea918b3d1498af6bcbd5407b8adc862ad892b1ff3f7047",
     "zh:34697e3abbef0b01b883792983bcf0f9e55c131ce3afa167f76b8712384fbc50",

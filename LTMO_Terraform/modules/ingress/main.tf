@@ -27,6 +27,11 @@ resource "helm_release" "nginx_ingress" {
     name  = "controller.ingressClassResource.default"
     value = "true"
   }
+
+  set {
+    name  = "controller.service.externalTrafficPolicy"
+    value = "Local"
+  }
 }
 
 # Wait for the ingress controller to be ready

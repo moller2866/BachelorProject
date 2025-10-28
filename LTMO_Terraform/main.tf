@@ -205,27 +205,20 @@ module "ingress" {
     module.tempo
   ]
 }
+
 # Grafana provisioning
 provider "grafana" {
-  url = "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+  url  = "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
   auth = var.grafana_api_key
 }
+module "grafana-provisioning" {
+  source = "./modules/grafana-provisioning"
 
-resource "grafana_data_source" "loki" {
-  name = "Loki"
-  type = "loki"
-  url  = "http://${module.ingress.ingress_host}/loki"
-  is_default = false
+  loki_url  = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}/loki"
+  tempo_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}/tempo"
+  mimir_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir/prometheus" : "http://${module.ingress.ingress_ip}/mimir/prometheus"
+
+  depends_on = [module.ingress]
+
 }
 
-resource "grafana_data_source" "tempo" {
-  name = "Tempo"
-  type = "tempo"
-  url  = "http://${module.ingress.ingress_host}/tempo"
-}
-
-resource "grafana_data_source" "mimir" {
-  name = "Mimir"
-  type = "prometheus"
-  url  = "http://${module.ingress.ingress_host}/mimir"
-}
