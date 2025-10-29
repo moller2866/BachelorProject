@@ -1,0 +1,53 @@
+# Copy this file to terraform.tfvars and customize the values
+
+# Basic Configuration
+resource_group_name = "rg-observability-demo"
+location           = "westeurope"
+
+# AKS Configuration
+aks_cluster_name = "observability-demo-aks"
+node_count       = 3  # Adjust based on your needs (you had 2)
+node_vm_size     = "standard_b2pls_v2"
+
+# Storage Configuration
+# Note: Storage account names must be globally unique (3-24 characters, lowercase letters and numbers only)
+storage_account_name = "saobservabilitydemo"  # Change this to be unique
+
+# Azure AD Application
+app_display_name = "observability"
+
+# Kubernetes Configuration
+kubernetes_namespace = "observability"
+service_account_name = "observability"
+
+# Tags
+common_tags = {
+  Environment = "Demo"
+  ManagedBy   = "Terraform"
+  Project     = "Observability"
+}
+
+# Ingress Configuration
+# Set to false if you already have an NGINX Ingress Controller in your cluster
+ingress_install_nginx_controller = true
+
+# IngressClass to use (default: nginx)
+ingress_class_name = "nginx"
+
+# Optional: Set a custom hostname for the ingress
+# Leave empty ("") for IP-based access
+ingress_host = ""
+# Example with custom domain:
+# ingress_host = "observability.yourdomain.com"
+
+# TLS/HTTPS Configuration
+# Set to true to enable HTTPS (requires ingress_host to be set)
+ingress_enable_tls = false
+
+# Name of the Kubernetes secret containing TLS certificate
+# (Only used if ingress_enable_tls = true)
+ingress_tls_secret_name = "observability-tls"
+
+
+# API key for grafana provisioning, needs admin access.
+grafana_api_key = "KEY_VALUE_HERE"
