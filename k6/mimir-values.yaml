@@ -1,0 +1,30 @@
+﻿global:
+  storage:
+    backend: s3
+    s3:
+      bucket_name: mimir-blocks
+      endpoint: http://minio:9000
+      access_key: minio
+      secret_key: minio123
+      insecure: true
+
+distributor:
+  replicas: 2
+
+ingester:
+  replicas: 2
+
+querier:
+  replicas: 2
+
+compactor:
+  replicas: 1
+
+store_gateway:
+  replicas: 1
+
+query_frontend:
+  replicas: 1
+
+query_scheduler:
+  replicas: 1

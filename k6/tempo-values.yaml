@@ -1,0 +1,27 @@
+﻿tempo:
+  storage:
+    trace:
+      backend: s3
+      s3:
+        bucket_name: tempo-traces
+        endpoint: http://minio:9000
+        access_key: minio
+        secret_key: minio123
+        insecure: true
+
+distributor:
+  replicas: 1
+
+ingester:
+  replicas: 1
+
+querier:
+  replicas: 1
+
+queryFrontend:
+  enabled: true
+  http_listen_port: 3200
+
+gateway:
+  enabled: true
+  replicas: 1

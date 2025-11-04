@@ -1,0 +1,18 @@
+﻿apiVersion: v1
+kind: Pod
+metadata:
+  name: k6-runner
+  namespace: observability
+spec:
+  containers:
+  - name: k6
+    image: grafana/k6:latest
+    command: ["sleep", "3600"]  # keep pod alive
+    volumeMounts:
+    - name: k6-scripts
+      mountPath: /scripts
+  volumes:
+  - name: k6-scripts
+    hostPath:
+      path: /d/Programming/GithubRepos/BachelorProject/k6/k6-tests
+      type: Directory
