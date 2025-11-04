@@ -1,0 +1,5 @@
+resource_group_name = "rg-grafana"
+grafana_user = "username"
+grafana_password = "password"
+location            = "westeurope"
+dns_name_label      = "grafana-umbraco-dev-dns"
