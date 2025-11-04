@@ -30,7 +30,6 @@ builder.Services.AddHttpClient("remote");
 
 var app = builder.Build();
 
-app.UseObservabilityEndpoints();
 app.UseSimpleJsonExceptionHandler();
 app.UseSwaggerDocumentation();
 

@@ -46,15 +46,8 @@ public static class ObservabilityExtensions
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation()
                 .AddMeter("AspireTestApp.Custom")
-                .AddPrometheusExporter());
+                .AddOtlpExporter(o => o.Endpoint = new Uri(otlpEndpoint)));
 
         return builder;
-    }
-
-    public static IApplicationBuilder UseObservabilityEndpoints(this IApplicationBuilder app)
-    {
-        // /metrics for Prometheus
-        app.UseOpenTelemetryPrometheusScrapingEndpoint();
-        return app;
     }
 }

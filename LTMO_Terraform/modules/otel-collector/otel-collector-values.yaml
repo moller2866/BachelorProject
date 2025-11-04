@@ -1,0 +1,65 @@
+# OpenTelemetry Collector Helm values (to be filled later)
+
+mode: deployment
+
+presets:
+  logsCollection:
+    enabled: false
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.99.0
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+  processors:
+    batch:
+      send_batch_size: 512
+      timeout: 5s
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 15
+    resourcedetection/system:
+      # Modify the list of detectors to match the cloud environment
+      detectors: [azure]
+      timeout: 2s
+      override: false
+  exporters:
+    loki:
+      endpoint: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
+      tls:
+        insecure: true
+      headers:
+        X-Scope-OrgID: tenant1
+    prometheusremotewrite:
+      endpoint: http://mimir-distributor.observability.svc.cluster.local:8080/api/v1/push
+      headers:
+        X-Scope-OrgID: tenant1
+    otlp/tempo:
+      endpoint: http://tempo-distributor.observability.svc.cluster.local:4317
+      tls:
+        insecure: true
+      headers:
+        X-Scope-OrgID: tenant1
+  service:
+    telemetry:
+      metrics:
+        address: 0.0.0.0:8889
+    pipelines:
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, resourcedetection/system, batch]
+        exporters: [loki]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, resourcedetection/system, batch]
+        exporters: [prometheusremotewrite]
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, resourcedetection/system, batch]
+        exporters: [otlp/tempo]

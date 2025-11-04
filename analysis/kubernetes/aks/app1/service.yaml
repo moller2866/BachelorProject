@@ -5,11 +5,6 @@ metadata:
   namespace: aspire
   labels:
     app: aspire-test-app
-    metrics-scrape: "true"
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "80"
-    prometheus.io/path: "/metrics"
 spec:
   selector:
     app: aspire-test-app
