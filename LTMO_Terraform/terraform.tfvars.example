@@ -69,3 +69,11 @@ certificates_base_domain = ""
 
 # Enable TLS certificates for ingress (requires base_domain)
 certificates_enable_ingress_tls = false
+
+# Ingress mTLS Configuration
+ingress_enable_mtls = true  # Set to false to disable client certificate authentication
+ingress_mtls_verify_depth = 2  # Certificate chain verification depth (2 = client cert + intermediate CA)
+
+# Ingress TLS Configuration (required for mTLS to work!)
+ingress_enable_tls = true
+ingress_tls_secret_name = "observability-ingress-tls"

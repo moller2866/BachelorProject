@@ -108,6 +108,18 @@ variable "ingress_tls_secret_name" {
   default     = "observability-tls"
 }
 
+variable "ingress_enable_mtls" {
+  description = "Enable mTLS client certificate verification on the ingress"
+  type        = bool
+  default     = false
+}
+
+variable "ingress_mtls_verify_depth" {
+  description = "Verification depth for client certificates (how many CAs in the chain to verify)"
+  type        = number
+  default     = 1
+}
+
 variable "grafana_api_key" {
   type        = string
   description = "Grafana API key with admin or editor permissions"

@@ -46,3 +46,18 @@ output "nginx_controller_installed" {
   description = "Whether NGINX Ingress Controller was installed by this module"
   value       = var.install_nginx_controller
 }
+
+output "mtls_enabled" {
+  description = "Whether mTLS client certificate authentication is enabled"
+  value       = var.enable_mtls
+}
+
+output "mtls_ca_secret" {
+  description = "Name of the CA secret used for mTLS verification (if enabled)"
+  value       = var.enable_mtls ? "${var.ca_secret_namespace}/${var.ca_secret_name}" : "mTLS not enabled"
+}
+
+output "mtls_verify_depth" {
+  description = "Certificate verification depth for mTLS (if enabled)"
+  value       = var.enable_mtls ? var.mtls_verify_depth : null
+}

@@ -80,3 +80,27 @@ variable "tempo_service_port" {
   type        = number
   default     = 80
 }
+
+variable "enable_mtls" {
+  description = "Enable mTLS client certificate verification"
+  type        = bool
+  default     = false
+}
+
+variable "ca_secret_name" {
+  description = "Name of the Kubernetes secret containing the CA certificate for client verification (required if enable_mtls is true)"
+  type        = string
+  default     = ""
+}
+
+variable "ca_secret_namespace" {
+  description = "Namespace of the CA secret (defaults to cert-manager namespace)"
+  type        = string
+  default     = "cert-manager"
+}
+
+variable "mtls_verify_depth" {
+  description = "Verification depth for client certificates"
+  type        = number
+  default     = 1
+}

@@ -232,6 +232,12 @@ module "ingress" {
   tls_secret_name          = var.ingress_tls_secret_name
   install_nginx_controller = var.ingress_install_nginx_controller
 
+  # mTLS configuration
+  enable_mtls         = var.ingress_enable_mtls
+  ca_secret_name      = module.cert_manager.ca_secret_name
+  ca_secret_namespace = module.cert_manager.ca_secret_namespace
+  mtls_verify_depth   = var.ingress_mtls_verify_depth
+
   # Service configuration
   loki_service_name  = "${module.loki.release_name}-gateway"
   loki_service_port  = 80
@@ -244,7 +250,8 @@ module "ingress" {
     kubernetes_namespace.observability,
     module.loki,
     module.mimir,
-    module.tempo
+    module.tempo,
+    module.cert_manager
   ]
 }
 
@@ -256,9 +263,9 @@ provider "grafana" {
 module "grafana-provisioning" {
   source = "./modules/grafana-provisioning"
 
-  loki_url  = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}/loki"
-  tempo_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}/tempo"
-  mimir_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir/prometheus" : "http://${module.ingress.ingress_ip}/mimir/prometheus"
+  loki_url  = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}.nip.io/loki"
+  tempo_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}.nip.io/tempo"
+  mimir_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir/prometheus" : "http://${module.ingress.ingress_ip}.nip.io/mimir/prometheus"
 
   depends_on = [module.ingress]
 

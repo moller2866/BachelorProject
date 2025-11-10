@@ -167,3 +167,31 @@ output "grafana_url" {
   description = "URL to access Grafana frontend"
   value       = var.grafana_url != "" ? var.grafana_url : "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
 }
+
+# mTLS Configuration outputs
+output "mtls_enabled" {
+  description = "Whether mTLS client certificate authentication is enabled on the ingress"
+  value       = module.ingress.mtls_enabled
+}
+
+output "mtls_ca_secret" {
+  description = "CA secret used for mTLS client certificate verification"
+  value       = module.ingress.mtls_ca_secret
+}
+
+output "mtls_verify_depth" {
+  description = "Certificate verification depth for mTLS"
+  value       = module.ingress.mtls_verify_depth
+}
+
+output "mtls_setup_summary" {
+  description = "Summary of mTLS configuration for secure observability access"
+  value = {
+    enabled             = module.ingress.mtls_enabled
+    ca_secret           = module.ingress.mtls_ca_secret
+    verify_depth        = module.ingress.mtls_verify_depth
+    grafana_client_cert = module.certificates.grafana_client_cert_secret
+    developer_cert      = module.certificates.developer_client_cert_secret
+    ingress_tls_cert    = module.certificates.observability_ingress_tls_secret
+  }
+}
