@@ -51,3 +51,21 @@ ingress_tls_secret_name = "observability-tls"
 
 # API key for grafana provisioning, needs admin access.
 grafana_api_key = "KEY_VALUE_HERE"
+
+# Grafana Configuration
+# URL where Grafana is running (update this if your Grafana instance moves)
+grafana_url = "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+
+# Grafana hostname (for client certificate DNS names)
+# Extract the hostname without protocol and port
+grafana_hostname = "grafana-umbraco-dev-dns.westeurope.azurecontainer.io"
+
+# Certificates Configuration
+# Region identifier for certificate hostnames
+certificates_region_name = "westeurope"
+
+# Base domain for observability services (leave empty for IP-based access)
+certificates_base_domain = ""
+
+# Enable TLS certificates for ingress (requires base_domain)
+certificates_enable_ingress_tls = false

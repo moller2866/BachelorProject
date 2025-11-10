@@ -1,4 +1,5 @@
 variable "namespace" {
+
   description = "Kubernetes namespace where certificates will be created"
   type        = string
 }
@@ -9,37 +10,56 @@ variable "ca_issuer_name" {
   default     = "observability-ca-issuer"
 }
 
-variable "base_domain" {
-  description = "Base domain for service hostnames (e.g., observability.example.com)"
+variable "region_name" {
+  description = "Name of the region (used in certificate hostnames)"
   type        = string
+  default     = "region-a"
 }
 
-variable "region_name" {
-  description = "Region identifier for this deployment (e.g., region-a, westeurope)"
+variable "base_domain" {
+  description = "Base domain for ingress hostnames (e.g., observability.example.com)"
+  type        = string
+  default     = ""
+}
+
+variable "ingress_hostname" {
+  description = "Full hostname for the unified ingress (e.g., observability.example.com). If empty, will use 'observability-{region}.{base_domain}'"
+  type        = string
+  default     = ""
+}
+
+variable "certificate_duration" {
+  description = "Duration for certificate validity (e.g., 2160h = 90 days)"
+  type        = string
+  default     = "2160h0m0s" # 90 days
+}
+
+variable "certificate_renew_before" {
+  description = "Renew certificate before expiry (e.g., 720h = 30 days)"
+  type        = string
+  default     = "720h0m0s" # 30 days
+}
+
+variable "enable_ingress_tls" {
+  description = "Create TLS certificates for ingress endpoints"
+  type        = bool
+  default     = true
+}
+
+variable "grafana_namespace" {
+  description = "Kubernetes namespace where Grafana is deployed (for client certificates)"
   type        = string
   default     = "default"
 }
 
-variable "certificate_duration" {
-  description = "Certificate validity duration"
+variable "grafana_hostname" {
+  description = "Hostname where Grafana is running (e.g., grafana-umbraco-dev-dns.westeurope.azurecontainer.io). Used for client certificate DNS names."
   type        = string
-  default     = "2160h" # 90 days
+  default     = ""
 }
 
-variable "certificate_renew_before" {
-  description = "Renew certificate before expiry"
+variable "grafana_url" {
+  description = "Full URL to access Grafana frontend (e.g., http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000)"
   type        = string
-  default     = "720h" # 30 days
-}
-
-variable "enable_letsencrypt_ingress" {
-  description = "Use Let's Encrypt for ingress TLS certificates instead of internal CA"
-  type        = bool
-  default     = false
-}
-
-variable "letsencrypt_issuer_name" {
-  description = "Name of the Let's Encrypt ClusterIssuer (if enabled)"
-  type        = string
-  default     = "letsencrypt-prod"
+  default     = ""
 }

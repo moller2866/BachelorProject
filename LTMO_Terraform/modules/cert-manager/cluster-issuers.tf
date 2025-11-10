@@ -26,10 +26,10 @@ resource "kubernetes_manifest" "root_ca_certificate" {
       namespace = var.namespace
     }
     spec = {
-      isCA       = true
-      commonName = var.ca_common_name
-      secretName = "observability-root-ca-secret"
-      duration   = var.ca_duration
+      isCA        = true
+      commonName  = var.ca_common_name
+      secretName  = "observability-root-ca-secret"
+      duration    = var.ca_duration
       renewBefore = var.ca_renew_before
       privateKey = {
         algorithm = "RSA"

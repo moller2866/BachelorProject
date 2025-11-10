@@ -141,3 +141,29 @@ output "cert_manager_letsencrypt_issuer" {
   description = "Name of the Let's Encrypt ClusterIssuer (if enabled)"
   value       = module.cert_manager.letsencrypt_issuer_name
 }
+
+# Certificates outputs
+output "grafana_client_cert_secret" {
+  description = "Kubernetes secret containing Grafana's client certificate for mTLS"
+  value       = module.certificates.grafana_client_cert_secret
+}
+
+output "developer_client_cert_secret" {
+  description = "Kubernetes secret containing developer client certificate for CLI access"
+  value       = module.certificates.developer_client_cert_secret
+}
+
+output "observability_ingress_tls_secret" {
+  description = "Kubernetes secret containing TLS certificate for the unified observability ingress"
+  value       = module.certificates.observability_ingress_tls_secret
+}
+
+output "observability_ingress_hostname" {
+  description = "Hostname for the unified observability ingress"
+  value       = module.certificates.ingress_hostname
+}
+
+output "grafana_url" {
+  description = "URL to access Grafana frontend"
+  value       = var.grafana_url != "" ? var.grafana_url : "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+}

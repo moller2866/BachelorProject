@@ -143,3 +143,51 @@ variable "cert_manager_ca_common_name" {
   type        = string
   default     = "Observability Root CA"
 }
+
+variable "certificates_region_name" {
+  description = "Region name for certificate hostnames (e.g., westeurope, eastus)"
+  type        = string
+  default     = "region-a"
+}
+
+variable "certificates_base_domain" {
+  description = "Base domain for ingress hostnames (e.g., observability.example.com). Leave empty for IP-based access"
+  type        = string
+  default     = ""
+}
+
+variable "certificates_enable_ingress_tls" {
+  description = "Create TLS certificates for ingress endpoints (requires base_domain)"
+  type        = bool
+  default     = false
+}
+
+variable "certificates_duration" {
+  description = "Duration for certificate validity (e.g., 2160h = 90 days)"
+  type        = string
+  default     = "2160h"
+}
+
+variable "certificates_renew_before" {
+  description = "Renew certificate before expiry (e.g., 720h = 30 days)"
+  type        = string
+  default     = "720h"
+}
+
+variable "grafana_namespace" {
+  description = "Kubernetes namespace where Grafana is deployed"
+  type        = string
+  default     = "default"
+}
+
+variable "grafana_hostname" {
+  description = "Hostname where Grafana is running (e.g., grafana-umbraco-dev-dns.westeurope.azurecontainer.io)"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_url" {
+  description = "Full URL to access Grafana frontend (e.g., http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000)"
+  type        = string
+  default     = ""
+}

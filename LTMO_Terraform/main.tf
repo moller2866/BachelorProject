@@ -138,6 +138,29 @@ module "cert_manager" {
   depends_on = [module.aks]
 }
 
+# Certificates for mTLS and TLS
+module "certificates" {
+  source = "./modules/certificates"
+
+  namespace        = kubernetes_namespace.observability.metadata[0].name
+  ca_issuer_name   = module.cert_manager.ca_issuer_name
+  region_name      = var.certificates_region_name
+  base_domain      = var.certificates_base_domain
+  ingress_hostname = var.ingress_host # Use the same hostname as the ingress
+
+  enable_ingress_tls       = var.certificates_enable_ingress_tls
+  grafana_namespace        = var.grafana_namespace
+  grafana_hostname         = var.grafana_hostname
+  grafana_url              = var.grafana_url
+  certificate_duration     = var.certificates_duration
+  certificate_renew_before = var.certificates_renew_before
+
+  depends_on = [
+    kubernetes_namespace.observability,
+    module.cert_manager
+  ]
+}
+
 # Loki Deployment
 module "loki" {
   source = "./modules/loki"
@@ -227,7 +250,7 @@ module "ingress" {
 
 # Grafana provisioning
 provider "grafana" {
-  url  = "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+  url  = var.grafana_url != "" ? var.grafana_url : "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
   auth = var.grafana_api_key
 }
 module "grafana-provisioning" {
