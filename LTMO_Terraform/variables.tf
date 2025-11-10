@@ -113,3 +113,9 @@ variable "grafana_api_key" {
   description = "Grafana API key with admin or editor permissions"
   sensitive   = true
 }
+
+variable "cert_manager_version" {
+  description = "Version of the cert-manager Helm chart"
+  type        = string
+  default     = "v1.13.3"
+}

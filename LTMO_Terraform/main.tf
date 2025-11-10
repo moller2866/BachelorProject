@@ -119,6 +119,19 @@ resource "kubernetes_namespace" "observability" {
   depends_on = [module.aks]
 }
 
+# cert-manager for certificate management
+module "cert_manager" {
+  source = "./modules/cert-manager"
+
+  namespace                 = "cert-manager"
+  create_namespace          = true
+  chart_version             = var.cert_manager_version
+  install_crds              = true
+  enable_prometheus_metrics = true
+
+  depends_on = [module.aks]
+}
+
 # Loki Deployment
 module "loki" {
   source = "./modules/loki"

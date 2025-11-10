@@ -110,3 +110,19 @@ output "ingress_endpoints_summary" {
     tempo_path   = "/tempo"
   }
 }
+
+# cert-manager outputs
+output "cert_manager_namespace" {
+  description = "Namespace where cert-manager is installed"
+  value       = module.cert_manager.namespace
+}
+
+output "cert_manager_version" {
+  description = "Version of cert-manager deployed"
+  value       = module.cert_manager.chart_version
+}
+
+output "cert_manager_status" {
+  description = "Status of cert-manager deployment"
+  value       = module.cert_manager.release_status
+}
