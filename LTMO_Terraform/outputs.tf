@@ -126,3 +126,18 @@ output "cert_manager_status" {
   description = "Status of cert-manager deployment"
   value       = module.cert_manager.release_status
 }
+
+output "cert_manager_ca_issuer" {
+  description = "Name of the CA ClusterIssuer for internal mTLS certificates"
+  value       = module.cert_manager.ca_issuer_name
+}
+
+output "cert_manager_ca_secret" {
+  description = "Name of the root CA certificate secret"
+  value       = module.cert_manager.ca_secret_name
+}
+
+output "cert_manager_letsencrypt_issuer" {
+  description = "Name of the Let's Encrypt ClusterIssuer (if enabled)"
+  value       = module.cert_manager.letsencrypt_issuer_name
+}

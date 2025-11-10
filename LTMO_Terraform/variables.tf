@@ -119,3 +119,27 @@ variable "cert_manager_version" {
   type        = string
   default     = "v1.13.3"
 }
+
+variable "cert_manager_enable_letsencrypt" {
+  description = "Enable Let's Encrypt ClusterIssuer for public TLS certificates"
+  type        = bool
+  default     = false
+}
+
+variable "cert_manager_letsencrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications (required if enable_letsencrypt is true)"
+  type        = string
+  default     = ""
+}
+
+variable "cert_manager_letsencrypt_server" {
+  description = "Let's Encrypt server URL (production or staging)"
+  type        = string
+  default     = "https://acme-v02.api.letsencrypt.org/directory"
+}
+
+variable "cert_manager_ca_common_name" {
+  description = "Common Name for the self-signed root CA certificate"
+  type        = string
+  default     = "Observability Root CA"
+}

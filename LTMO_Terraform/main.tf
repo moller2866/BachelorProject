@@ -129,6 +129,12 @@ module "cert_manager" {
   install_crds              = true
   enable_prometheus_metrics = true
 
+  # ClusterIssuer configuration
+  enable_letsencrypt = var.cert_manager_enable_letsencrypt
+  letsencrypt_email  = var.cert_manager_letsencrypt_email
+  letsencrypt_server = var.cert_manager_letsencrypt_server
+  ca_common_name     = var.cert_manager_ca_common_name
+
   depends_on = [module.aks]
 }
 
