@@ -255,6 +255,29 @@ module "ingress" {
   ]
 }
 
+# Data sources to read certificate secrets for Grafana mTLS
+data "kubernetes_secret" "grafana_client_cert" {
+  count = var.grafana_datasources_enable_mtls ? 1 : 0
+
+  metadata {
+    name      = module.certificates.grafana_client_cert_secret
+    namespace = kubernetes_namespace.observability.metadata[0].name
+  }
+
+  depends_on = [module.certificates]
+}
+
+data "kubernetes_secret" "ca_cert" {
+  count = var.grafana_datasources_enable_mtls ? 1 : 0
+
+  metadata {
+    name      = module.cert_manager.ca_secret_name
+    namespace = module.cert_manager.ca_secret_namespace
+  }
+
+  depends_on = [module.cert_manager]
+}
+
 # Grafana provisioning
 provider "grafana" {
   url  = var.grafana_url != "" ? var.grafana_url : "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
@@ -263,9 +286,16 @@ provider "grafana" {
 module "grafana-provisioning" {
   source = "./modules/grafana-provisioning"
 
-  loki_url  = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}.nip.io/loki"
-  tempo_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}.nip.io/tempo"
-  mimir_url = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir/prometheus" : "http://${module.ingress.ingress_ip}.nip.io/mimir/prometheus"
+  loki_url  = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/loki" : "https://${module.ingress.ingress_ip}.nip.io/loki"
+  tempo_url = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/tempo" : "https://${module.ingress.ingress_ip}.nip.io/tempo"
+  mimir_url = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/mimir/prometheus" : "https://${module.ingress.ingress_ip}.nip.io/mimir/prometheus"
+
+  # mTLS configuration
+  enable_mtls         = var.grafana_datasources_enable_mtls
+  tls_skip_verify     = var.grafana_datasources_tls_skip_verify
+  grafana_client_cert = var.grafana_datasources_enable_mtls ? data.kubernetes_secret.grafana_client_cert[0].data["tls.crt"] : ""
+  grafana_client_key  = var.grafana_datasources_enable_mtls ? data.kubernetes_secret.grafana_client_cert[0].data["tls.key"] : ""
+  ca_cert             = var.grafana_datasources_enable_mtls ? data.kubernetes_secret.ca_cert[0].data["tls.crt"] : ""
 
   depends_on = [module.ingress]
 

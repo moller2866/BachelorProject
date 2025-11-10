@@ -120,9 +120,22 @@ variable "ingress_mtls_verify_depth" {
   default     = 1
 }
 
+# Grafana Datasource Configuration
+variable "grafana_datasources_enable_mtls" {
+  description = "Enable mTLS client certificate authentication for Grafana datasources"
+  type        = bool
+  default     = false
+}
+
+variable "grafana_datasources_tls_skip_verify" {
+  description = "Skip TLS certificate verification for Grafana datasources (useful for self-signed certificates)"
+  type        = bool
+  default     = true
+}
+
 variable "grafana_api_key" {
-  type        = string
   description = "Grafana API key with admin or editor permissions"
+  type        = string
   sensitive   = true
 }
 
