@@ -39,12 +39,6 @@ variable "nginx_controller_version" {
   default     = "4.11.3"
 }
 
-variable "additional_annotations" {
-  description = "Additional annotations to add to the ingress"
-  type        = map(string)
-  default     = {}
-}
-
 variable "loki_service_name" {
   description = "Name of the Loki gateway service"
   type        = string

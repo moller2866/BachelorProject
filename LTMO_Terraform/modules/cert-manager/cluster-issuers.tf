@@ -12,7 +12,8 @@ resource "kubernetes_manifest" "selfsigned_issuer" {
   }
 
   depends_on = [
-    time_sleep.wait_for_cert_manager
+    time_sleep.wait_for_cert_manager,
+    helm_release.cert_manager
   ]
 }
 

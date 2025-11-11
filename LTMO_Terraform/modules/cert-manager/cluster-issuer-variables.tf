@@ -25,7 +25,7 @@ variable "ca_common_name" {
 variable "ca_duration" {
   description = "Duration for CA certificate validity (in hours)"
   type        = string
-  default     = "87600h0m0s" # 10 years
+  default     = "2160h0m0s" # 90 days
 }
 
 variable "ca_renew_before" {

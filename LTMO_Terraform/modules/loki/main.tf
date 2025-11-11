@@ -1,45 +1,3 @@
-# Generate htpasswd for basic auth
-resource "random_password" "loki_password" {
-  length  = 16
-  special = true
-}
-
-locals {
-  loki_username = "loki"
-  loki_password = random_password.loki_password.result
-}
-
-# Create basic auth secret for Loki
-resource "kubernetes_secret" "loki_basic_auth" {
-  metadata {
-    name      = "loki-basic-auth"
-    namespace = var.namespace
-  }
-
-  data = {
-    ".htpasswd" = "${local.loki_username}:${htpasswd_password.loki.apr1}"
-  }
-}
-
-# Generate htpasswd hash
-resource "htpasswd_password" "loki" {
-  password = local.loki_password
-  salt     = substr(md5(local.loki_password), 0, 8)
-}
-
-# Create canary basic auth secret
-resource "kubernetes_secret" "canary_basic_auth" {
-  metadata {
-    name      = "canary-basic-auth"
-    namespace = var.namespace
-  }
-
-  data = {
-    username = local.loki_username
-    password = local.loki_password
-  }
-}
-
 resource "azurerm_storage_container" "loki_chunks" {
   name                  = "loki-chunk-bucket"
   storage_account_name  = var.storage_account_name
@@ -75,8 +33,6 @@ resource "helm_release" "loki" {
   ]
 
   depends_on = [
-    kubernetes_secret.loki_basic_auth,
-    kubernetes_secret.canary_basic_auth,
     azurerm_storage_container.loki_chunks,
     azurerm_storage_container.loki_ruler
   ]

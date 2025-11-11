@@ -99,7 +99,10 @@ memcached:
   enabled: false
 chunks-cache:
   enabled: false
-
+lokiCanary:
+  enabled: false
+test:
+  enabled: false
 backend:
   replicas: 0
 read:

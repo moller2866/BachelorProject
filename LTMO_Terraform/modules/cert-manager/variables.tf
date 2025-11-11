@@ -4,12 +4,6 @@ variable "namespace" {
   default     = "cert-manager"
 }
 
-variable "create_namespace" {
-  description = "Whether to create the namespace for cert-manager"
-  type        = bool
-  default     = true
-}
-
 variable "chart_version" {
   description = "Version of the cert-manager Helm chart"
   type        = string

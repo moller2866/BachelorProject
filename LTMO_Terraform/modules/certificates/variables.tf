@@ -46,20 +46,8 @@ variable "enable_ingress_tls" {
   default     = true
 }
 
-variable "grafana_namespace" {
-  description = "Kubernetes namespace where Grafana is deployed (for client certificates)"
-  type        = string
-  default     = "default"
-}
-
 variable "grafana_hostname" {
   description = "Hostname where Grafana is running (e.g., grafana-umbraco-dev-dns.westeurope.azurecontainer.io). Used for client certificate DNS names."
-  type        = string
-  default     = ""
-}
-
-variable "grafana_url" {
-  description = "Full URL to access Grafana frontend (e.g., http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000)"
   type        = string
   default     = ""
 }

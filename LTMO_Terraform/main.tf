@@ -123,8 +123,7 @@ resource "kubernetes_namespace" "observability" {
 module "cert_manager" {
   source = "./modules/cert-manager"
 
-  namespace                 = "cert-manager"
-  create_namespace          = true
+  namespace                 = kubernetes_namespace.observability.metadata[0].name
   chart_version             = var.cert_manager_version
   install_crds              = true
   enable_prometheus_metrics = true
@@ -135,7 +134,10 @@ module "cert_manager" {
   letsencrypt_server = var.cert_manager_letsencrypt_server
   ca_common_name     = var.cert_manager_ca_common_name
 
-  depends_on = [module.aks]
+  depends_on = [
+    module.aks,
+    kubernetes_namespace.observability
+  ]
 }
 
 # Certificates for mTLS and TLS
@@ -149,9 +151,7 @@ module "certificates" {
   ingress_hostname = var.ingress_host # Use the same hostname as the ingress
 
   enable_ingress_tls       = var.certificates_enable_ingress_tls
-  grafana_namespace        = var.grafana_namespace
   grafana_hostname         = var.grafana_hostname
-  grafana_url              = var.grafana_url
   certificate_duration     = var.certificates_duration
   certificate_renew_before = var.certificates_renew_before
 
@@ -235,7 +235,7 @@ module "ingress" {
   # mTLS configuration
   enable_mtls         = var.ingress_enable_mtls
   ca_secret_name      = module.cert_manager.ca_secret_name
-  ca_secret_namespace = module.cert_manager.ca_secret_namespace
+  ca_secret_namespace = module.cert_manager.namespace
   mtls_verify_depth   = var.ingress_mtls_verify_depth
 
   # Service configuration
@@ -272,7 +272,7 @@ data "kubernetes_secret" "ca_cert" {
 
   metadata {
     name      = module.cert_manager.ca_secret_name
-    namespace = module.cert_manager.ca_secret_namespace
+    namespace = module.cert_manager.namespace
   }
 
   depends_on = [module.cert_manager]
@@ -280,7 +280,7 @@ data "kubernetes_secret" "ca_cert" {
 
 # Grafana provisioning
 provider "grafana" {
-  url  = var.grafana_url != "" ? var.grafana_url : "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+  url  = var.grafana_hostname != "" ? "http://${var.grafana_hostname}:3000" : "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
   auth = var.grafana_api_key
 }
 module "grafana-provisioning" {
@@ -297,7 +297,11 @@ module "grafana-provisioning" {
   grafana_client_key  = var.grafana_datasources_enable_mtls ? data.kubernetes_secret.grafana_client_cert[0].data["tls.key"] : ""
   ca_cert             = var.grafana_datasources_enable_mtls ? data.kubernetes_secret.ca_cert[0].data["tls.crt"] : ""
 
-  depends_on = [module.ingress]
+  depends_on = [
+    module.ingress,
+    data.kubernetes_secret.grafana_client_cert,
+    data.kubernetes_secret.ca_cert
+  ]
 
 }
 

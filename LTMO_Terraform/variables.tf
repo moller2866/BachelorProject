@@ -190,13 +190,13 @@ variable "certificates_enable_ingress_tls" {
 variable "certificates_duration" {
   description = "Duration for certificate validity (e.g., 2160h = 90 days)"
   type        = string
-  default     = "2160h"
+  default     = "2160h0m0s"
 }
 
 variable "certificates_renew_before" {
   description = "Renew certificate before expiry (e.g., 720h = 30 days)"
   type        = string
-  default     = "720h"
+  default     = "720h0m0s"
 }
 
 variable "grafana_namespace" {
@@ -211,8 +211,3 @@ variable "grafana_hostname" {
   default     = ""
 }
 
-variable "grafana_url" {
-  description = "Full URL to access Grafana frontend (e.g., http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000)"
-  type        = string
-  default     = ""
-}
