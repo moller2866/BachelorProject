@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimir
+  namespace: observability
+  labels:
+    app: mimir
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mimir
+  template:
+    metadata:
+      labels:
+        app: mimir
+    spec:
+      containers:
+        - name: mimir
+          image: grafana/mimir:latest
+          args:
+            - "-config.file=/etc/mimir/mimir.yaml"
+          ports:
+            - containerPort: 9009
+              name: http
+          volumeMounts:
+            - name: mimir-config
+              mountPath: /etc/mimir
+              readOnly: true
+            - name: mimir-data
+              mountPath: /tmp/mimir
+            - name: mimir-compactor
+              mountPath: /tmp/mimir/compactor
+      volumes:
+        - name: mimir-config
+          configMap:
+            name: mimir-config
+            items:
+              - key: mimir.yaml
+                path: mimir.yaml
+        - name: mimir-data
+          persistentVolumeClaim:
+            claimName: mimir-pvc
+        - name: mimir-compactor
+          persistentVolumeClaim:
+            claimName: mimir-sync-pvc

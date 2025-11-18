@@ -90,7 +90,7 @@ module "workload_identity" {
   service_account_name_tempo = var.service_account_name_tempo
   storage_account_id         = module.storage.storage_account_id
 
-  depends_on = [module.aks]
+  depends_on = [module.aks, module.storage]
 }
 
 # Configure Kubernetes and Helm providers

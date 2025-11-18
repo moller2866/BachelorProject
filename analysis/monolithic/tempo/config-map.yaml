@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-config
+  namespace: observability
+data:
+  tempo.yaml: |
+    server:
+      http_listen_port: 3200
+      log_level: info
+    stream_over_http_enabled: true
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            http:
+              endpoint: "tempo:3201"
+            grpc:
+              endpoint: "tempo:4317"
+
+    storage:
+      trace:
+        backend: azure
+        azure:
+          account_name: ${AZURE_ACCOUNT_NAME}
+          account_key: ${AZURE_ACCOUNT_KEY}
+          container_name: ${AZURE_TEMPO_CONTAINER}
+        wal:
+          path: /var/tempo/wal
+
+    multitenancy_enabled: false

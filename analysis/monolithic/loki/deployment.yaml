@@ -1,0 +1,62 @@
+# -------------------------
+# Deployment: Loki (monolithic)
+# -------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: observability
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+        - name: loki
+          image: grafana/loki:latest
+          env:
+          - name: AZURE_ACCOUNT_NAME
+            valueFrom:
+              secretKeyRef:
+                name: azure-storage
+                key: account_name
+          - name: AZURE_ACCOUNT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: azure-storage
+                key: account_key
+          - name: AZURE_LOKI_CONTAINER
+            value: "loki"
+          args:
+            - "-config.file=/etc/loki/local-config.yaml"
+          ports:
+            - containerPort: 3100
+              name: http
+          volumeMounts:
+            - name: loki-config
+              mountPath: /etc/loki
+              readOnly: true
+            - name: loki-data
+              mountPath: /loki
+            - name: loki-rules
+              mountPath: /loki/rules
+      volumes:
+        - name: loki-config
+          configMap:
+            name: loki-config
+            items:
+              - key: local-config.yaml
+                path: local-config.yaml
+        - name: loki-data
+          persistentVolumeClaim:
+            claimName: loki-pvc
+        - name: loki-rules
+          persistentVolumeClaim:
+            claimName: loki-pvc

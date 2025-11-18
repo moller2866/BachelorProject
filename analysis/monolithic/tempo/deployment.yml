@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: observability
+  labels:
+    app: tempo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:latest
+          args:
+            - "-config.file=/etc/tempo/tempo.yaml"
+          ports:
+            - containerPort: 3200
+              name: http
+            - containerPort: 4317
+              name: otlp-grpc
+          volumeMounts:
+            - name: tempo-config
+              mountPath: /etc/tempo
+              readOnly: true
+            - name: tempo-wal
+              mountPath: /var/tempo/wal
+      volumes:
+        - name: tempo-config
+          configMap:
+            name: tempo-config
+            items:
+              - key: tempo.yaml
+                path: tempo.yaml
+        - name: tempo-wal
+          persistentVolumeClaim:
+            claimName: tempo-wal-pvc
