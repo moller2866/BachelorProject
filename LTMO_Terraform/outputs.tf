@@ -28,24 +28,6 @@ output "kube_config_command" {
   value       = "az aks get-credentials --resource-group ${azurerm_resource_group.observability.name} --name ${module.aks.cluster_name}"
 }
 
-output "loki_gateway_ip" {
-  description = "External IP of Loki gateway (may take a few minutes to provision)"
-  value       = module.loki.gateway_external_ip
-}
-
-# Add the missing Loki authentication outputs
-output "loki_username" {
-  description = "Username for Loki basic auth"
-  value       = module.loki.loki_username
-  sensitive   = true
-}
-
-output "loki_password" {
-  description = "Password for Loki basic auth"
-  value       = module.loki.loki_password
-  sensitive   = true
-}
-
 # OpenTelemetry Collector outputs
 output "otel_collector_service" {
   description = "OpenTelemetry Collector service name"
@@ -74,39 +56,75 @@ output "tempo_traces_container" {
   value       = module.tempo.traces_container_name
 }
 
-# Unified Ingress outputs
-output "ingress_ip" {
-  description = "LoadBalancer IP address for the unified observability ingress"
-  value       = module.ingress.ingress_ip
-}
-
-output "ingress_host" {
-  description = "Hostname configured for the ingress (if any)"
-  value       = module.ingress.ingress_host
-}
-
 output "loki_url" {
   description = "URL to access Loki via the unified ingress"
-  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}/loki"
+  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}.nip.io/loki"
 }
 
 output "mimir_url" {
   description = "URL to access Mimir (Prometheus-compatible) via the unified ingress"
-  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir" : "http://${module.ingress.ingress_ip}/mimir"
+  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir" : "http://${module.ingress.ingress_ip}.nip.io/mimir"
 }
 
 output "tempo_url" {
   description = "URL to access Tempo via the unified ingress"
-  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}/tempo"
+  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}.nip.io/tempo"
 }
 
-output "ingress_endpoints_summary" {
-  description = "Summary of all unified ingress endpoints"
-  value = {
-    ingress_ip   = module.ingress.ingress_ip
-    ingress_host = module.ingress.ingress_host
-    loki_path    = "/loki"
-    mimir_path   = "/mimir"
-    tempo_path   = "/tempo"
-  }
+# cert-manager outputs
+output "cert_manager_namespace" {
+  description = "Namespace where cert-manager is installed"
+  value       = module.cert_manager.namespace
+}
+
+output "cert_manager_version" {
+  description = "Version of cert-manager deployed"
+  value       = module.cert_manager.chart_version
+}
+
+output "cert_manager_status" {
+  description = "Status of cert-manager deployment"
+  value       = module.cert_manager.release_status
+}
+
+output "cert_manager_ca_issuer" {
+  description = "Name of the CA ClusterIssuer for internal mTLS certificates"
+  value       = module.cert_manager.ca_issuer_name
+}
+
+output "cert_manager_ca_secret" {
+  description = "Name of the root CA certificate secret"
+  value       = module.cert_manager.ca_secret_name
+}
+
+output "cert_manager_letsencrypt_issuer" {
+  description = "Name of the Let's Encrypt ClusterIssuer (if enabled)"
+  value       = module.cert_manager.letsencrypt_issuer_name
+}
+
+# Certificates outputs
+output "grafana_client_cert_secret" {
+  description = "Kubernetes secret containing Grafana's client certificate for mTLS"
+  value       = module.certificates.grafana_client_cert_secret
+}
+
+output "observability_ingress_hostname" {
+  description = "Hostname for the unified observability ingress"
+  value       = module.certificates.ingress_hostname
+}
+
+# mTLS Configuration outputs
+output "mtls_enabled" {
+  description = "Whether mTLS client certificate authentication is enabled on the ingress"
+  value       = module.ingress.mtls_enabled
+}
+
+output "mtls_ca_secret" {
+  description = "CA secret used for mTLS client certificate verification"
+  value       = module.ingress.mtls_ca_secret
+}
+
+output "mtls_verify_depth" {
+  description = "Certificate verification depth for mTLS"
+  value       = module.ingress.mtls_verify_depth
 }

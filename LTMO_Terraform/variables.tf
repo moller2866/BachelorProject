@@ -108,8 +108,106 @@ variable "ingress_tls_secret_name" {
   default     = "observability-tls"
 }
 
+variable "ingress_enable_mtls" {
+  description = "Enable mTLS client certificate verification on the ingress"
+  type        = bool
+  default     = false
+}
+
+variable "ingress_mtls_verify_depth" {
+  description = "Verification depth for client certificates (how many CAs in the chain to verify)"
+  type        = number
+  default     = 1
+}
+
+# Grafana Datasource Configuration
+variable "grafana_datasources_enable_mtls" {
+  description = "Enable mTLS client certificate authentication for Grafana datasources"
+  type        = bool
+  default     = false
+}
+
+variable "grafana_datasources_tls_skip_verify" {
+  description = "Skip TLS certificate verification for Grafana datasources (useful for self-signed certificates)"
+  type        = bool
+  default     = true
+}
+
 variable "grafana_api_key" {
-  type        = string
   description = "Grafana API key with admin or editor permissions"
+  type        = string
   sensitive   = true
 }
+
+variable "cert_manager_version" {
+  description = "Version of the cert-manager Helm chart"
+  type        = string
+  default     = "v1.13.3"
+}
+
+variable "cert_manager_enable_letsencrypt" {
+  description = "Enable Let's Encrypt ClusterIssuer for public TLS certificates"
+  type        = bool
+  default     = false
+}
+
+variable "cert_manager_letsencrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications (required if enable_letsencrypt is true)"
+  type        = string
+  default     = ""
+}
+
+variable "cert_manager_letsencrypt_server" {
+  description = "Let's Encrypt server URL (production or staging)"
+  type        = string
+  default     = "https://acme-v02.api.letsencrypt.org/directory"
+}
+
+variable "cert_manager_ca_common_name" {
+  description = "Common Name for the self-signed root CA certificate"
+  type        = string
+  default     = "Observability Root CA"
+}
+
+variable "certificates_region_name" {
+  description = "Region name for certificate hostnames (e.g., westeurope, eastus)"
+  type        = string
+  default     = "region-a"
+}
+
+variable "certificates_base_domain" {
+  description = "Base domain for ingress hostnames (e.g., observability.example.com). Leave empty for IP-based access"
+  type        = string
+  default     = ""
+}
+
+variable "certificates_enable_ingress_tls" {
+  description = "Create TLS certificates for ingress endpoints (requires base_domain)"
+  type        = bool
+  default     = false
+}
+
+variable "certificates_duration" {
+  description = "Duration for certificate validity (e.g., 2160h = 90 days)"
+  type        = string
+  default     = "2160h0m0s"
+}
+
+variable "certificates_renew_before" {
+  description = "Renew certificate before expiry (e.g., 720h = 30 days)"
+  type        = string
+  default     = "720h0m0s"
+}
+
+variable "grafana_namespace" {
+  description = "Kubernetes namespace where Grafana is deployed"
+  type        = string
+  default     = "default"
+}
+
+variable "grafana_hostname" {
+  description = "Hostname where Grafana is running (e.g., grafana-umbraco-dev-dns.westeurope.azurecontainer.io)"
+  type        = string
+  default     = ""
+}
+

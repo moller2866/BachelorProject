@@ -55,7 +55,13 @@ resource "kubernetes_ingress_v1" "observability" {
         "nginx.ingress.kubernetes.io/use-regex"      = "true"
         "nginx.ingress.kubernetes.io/ssl-redirect"   = var.enable_tls ? "true" : "false"
       },
-      var.additional_annotations
+      # mTLS annotations (only added if mTLS is enabled)
+      var.enable_mtls && var.ca_secret_name != "" ? {
+        "nginx.ingress.kubernetes.io/auth-tls-verify-client"                = "on"
+        "nginx.ingress.kubernetes.io/auth-tls-secret"                       = "${var.ca_secret_namespace}/${var.ca_secret_name}"
+        "nginx.ingress.kubernetes.io/auth-tls-verify-depth"                 = tostring(var.mtls_verify_depth)
+        "nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream" = "true"
+      } : {}
     )
   }
 
@@ -64,16 +70,16 @@ resource "kubernetes_ingress_v1" "observability" {
 
     # TLS configuration (optional)
     dynamic "tls" {
-      for_each = var.enable_tls && var.host != "" ? [1] : []
+      for_each = var.enable_tls ? [1] : []
       content {
-        hosts       = [var.host]
+        hosts       = [var.host != "" ? var.host : "${data.kubernetes_service.nginx_ingress_controller[0].status[0].load_balancer[0].ingress[0].ip}.nip.io"]
         secret_name = var.tls_secret_name
       }
     }
 
     # Rule for IP-based or hostname-based access
     rule {
-      host = var.host != "" ? var.host : null
+      host = var.host != "" ? var.host : "${data.kubernetes_service.nginx_ingress_controller[0].status[0].load_balancer[0].ingress[0].ip}.nip.io"
 
       http {
         # Loki path

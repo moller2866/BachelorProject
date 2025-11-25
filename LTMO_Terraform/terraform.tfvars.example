@@ -51,3 +51,40 @@ ingress_tls_secret_name = "observability-tls"
 
 # API key for grafana provisioning, needs admin access.
 grafana_api_key = "KEY_VALUE_HERE"
+
+# Grafana Configuration
+# URL where Grafana is running (update this if your Grafana instance moves)
+grafana_url = "http://grafana-umbraco-dev-dns.westeurope.azurecontainer.io:3000/"
+
+# Grafana hostname (for client certificate DNS names)
+# Extract the hostname without protocol and port
+grafana_hostname = "grafana-umbraco-dev-dns.westeurope.azurecontainer.io"
+
+# Certificates Configuration
+# Region identifier for certificate hostnames
+certificates_region_name = "westeurope"
+
+# Base domain for observability services (leave empty for IP-based access)
+certificates_base_domain = ""
+
+# Enable TLS certificates for ingress (requires base_domain)
+certificates_enable_ingress_tls = false
+
+# Ingress mTLS Configuration
+ingress_enable_mtls = true  # Set to false to disable client certificate authentication
+ingress_mtls_verify_depth = 2  # Certificate chain verification depth (2 = client cert + intermediate CA)
+
+# Ingress TLS Configuration (required for mTLS to work!)
+ingress_enable_tls = true
+ingress_tls_secret_name = "observability-ingress-tls"
+
+# ================================================================================
+# Phase 5: Grafana Datasource mTLS Configuration
+# ================================================================================
+
+# Enable mTLS client certificate authentication for Grafana datasources
+grafana_datasources_enable_mtls = true
+
+# Skip TLS server certificate verification (useful for self-signed certificates)
+# Set to false when using Let's Encrypt or other publicly-trusted CAs
+grafana_datasources_tls_skip_verify = true
