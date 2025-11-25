@@ -1,0 +1,52 @@
+﻿mode: deployment
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.99.0
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+  processors:
+    batch:
+      send_batch_size: 512
+      timeout: 5s
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 15
+  exporters:
+    loki:
+      endpoint: http://loki-distributor.observability.svc.cluster.local:3100/loki/api/v1/push
+      tls:
+        insecure: true
+      headers:
+        X-Scope-OrgID: tenant1
+    prometheusremotewrite:
+      endpoint: http://mimir-distributor.observability.svc.cluster.local:9009/api/v1/push
+      headers:
+        X-Scope-OrgID: tenant1
+    otlp/tempo:
+      endpoint: http://tempo-distributor.observability.svc.cluster.local:4317
+      tls:
+        insecure: true
+      headers:
+        X-Scope-OrgID: tenant1
+  service:
+    telemetry:
+      metrics:
+        address: 0.0.0.0:8889
+    pipelines:
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [loki]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [prometheusremotewrite]
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlp/tempo]

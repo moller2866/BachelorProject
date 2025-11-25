@@ -1,0 +1,38 @@
+﻿loki:
+  storage:
+    type: s3
+    s3:
+      bucketNames:
+        chunks: loki-chunks
+        index: loki-index
+      endpoint: http://minio:9000
+      accessKeyID: minio
+      secretAccessKey: minio123
+      insecure: true
+
+deploymentMode: Distributed
+ingester:
+  replicas: 2
+  maxUnavailable: 1
+  zoneAwareReplication:
+    enabled: false
+querier:
+  replicas: 2
+  maxUnavailable: 1
+queryFrontend:
+  replicas: 2
+  maxUnavailable: 1
+queryScheduler:
+  replicas: 2
+distributor:
+  replicas: 2
+  maxUnavailable: 1
+compactor:
+  replicas: 1
+indexGateway:
+  replicas: 2
+  maxUnavailable: 1
+ruler:
+  replicas: 1
+  maxUnavailable: 1
+

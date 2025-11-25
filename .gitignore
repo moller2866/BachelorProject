@@ -1,0 +1,116 @@
+# ---- .NET / C# standard ignores ----
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+
+# Generated files
+Generated*/
+
+# NuGet
+*.nupkg
+# (Lock file is usually committed; uncomment if you want to ignore)
+# packages.lock.json
+
+# Benchmark results
+BenchmarkDotNet.Artifacts/
+
+# Test results
+TestResult*/
+*.coverage
+*.coveragexml
+coverage*/
+
+# Profiling
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Azure
+PublishProfiles/
+
+# Entity Framework Migrations cache
+*Migrations/obj/
+
+# MSBuild binary and cache files
+*.obj
+*.cache
+*.ide
+
+# Tye / Aspire temp (if used)
+.tye/
+*.tye.json
+
+# OpenTelemetry temp / dumps
+*.dmp
+*.diag
+
+# Logs
+*.log
+logs/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+*.env
+.env
+.env.*
+secrets.json
+UserSecrets*/
+
+# Docker / container local artifacts
+*.pid
+
+docker-compose.override.yml
+
+# Optional: uncomment if you generate these locally and don't want them tracked
+# *.generated.cs
+# *.g.cs
+# *.Designer.cs
+# *.AssemblyInfo.cs
+
+# Localization generated resources
+*.resources.dll
+
+# Backup & temp
+*~
+*.tmp
+*.bak
+*.swp
+
+# Crash dumps
+*.mdmp
+
+# Coverage tools
+lcov.info
+
+# JetBrains Rider caches
+.idea/.idea.*
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# StyleCop cache
+StyleCopReport.xml
+
+# NCrunch
+_NCrunch_*/
+.*crunch*.local.xml
+
+# Paket
+.paket/
+paket-files/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Local tooling
+.tools/
+
+.vs/
+# End of file
