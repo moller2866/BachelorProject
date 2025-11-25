@@ -61,7 +61,6 @@ resource "kubernetes_ingress_v1" "observability" {
         "nginx.ingress.kubernetes.io/auth-tls-secret"                       = "${var.ca_secret_namespace}/${var.ca_secret_name}"
         "nginx.ingress.kubernetes.io/auth-tls-verify-depth"                 = tostring(var.mtls_verify_depth)
         "nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream" = "true"
-        "cert-manager.io/cluster-issuer"                                    = "letsencrypt-prod"
       } : {}
     )
   }
