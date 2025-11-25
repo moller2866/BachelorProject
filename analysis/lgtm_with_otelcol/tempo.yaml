@@ -1,0 +1,20 @@
+﻿server:
+  http_listen_port: 3200
+  log_level: info
+stream_over_http_enabled: true
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: "tempo:3201"
+        grpc:
+          endpoint: "tempo:4317"
+
+storage:
+  trace:
+    backend: local # backend configuration to use
+    wal:
+      path: /var/tempo/wal # where to store the wal locally
+    local:
+      path: /var/tempo/blocks
