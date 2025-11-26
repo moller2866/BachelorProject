@@ -97,11 +97,6 @@ output "cert_manager_ca_secret" {
   value       = module.cert_manager.ca_secret_name
 }
 
-output "cert_manager_letsencrypt_issuer" {
-  description = "Name of the Let's Encrypt ClusterIssuer (if enabled)"
-  value       = module.cert_manager.letsencrypt_issuer_name
-}
-
 # Certificates outputs
 output "grafana_client_cert_secret" {
   description = "Kubernetes secret containing Grafana's client certificate for mTLS"

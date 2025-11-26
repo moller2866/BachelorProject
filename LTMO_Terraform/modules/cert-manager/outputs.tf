@@ -27,8 +27,3 @@ output "ca_secret_name" {
   description = "Name of the Kubernetes secret containing the root CA certificate"
   value       = kubernetes_manifest.root_ca_certificate.manifest.spec.secretName
 }
-
-output "letsencrypt_issuer_name" {
-  description = "Name of the Let's Encrypt ClusterIssuer (if enabled)"
-  value       = var.enable_letsencrypt && var.letsencrypt_email != "" ? kubernetes_manifest.letsencrypt_issuer[0].manifest.metadata.name : null
-}
