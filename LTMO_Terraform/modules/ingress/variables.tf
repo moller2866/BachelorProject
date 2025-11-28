@@ -18,7 +18,7 @@ variable "host" {
 variable "enable_tls" {
   description = "Enable TLS/HTTPS for the ingress"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "tls_secret_name" {

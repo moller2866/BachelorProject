@@ -1,3 +1,8 @@
+output "ingress_tls_secret" {
+  description = "Name of the Kubernetes secret containing the ingress TLS certificate"
+  value       = var.enable_ingress_tls ? kubernetes_manifest.ingress_tls_cert[0].manifest.spec.secretName : ""
+}
+
 output "grafana_client_cert_secret" {
   description = "Name of the Kubernetes secret containing Grafana's client certificate"
   value       = kubernetes_manifest.grafana_client_cert.manifest.spec.secretName
