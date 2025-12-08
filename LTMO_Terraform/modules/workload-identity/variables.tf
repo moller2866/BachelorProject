@@ -8,8 +8,16 @@ variable "aks_oidc_issuer_url" {
   type        = string
 }
 
-variable "namespace" {
-  description = "Kubernetes namespace"
+variable "loki_namespace" {
+  description = "Kubernetes loki namespace"
+  type        = string
+}
+variable "mimir_namespace" {
+  description = "Kubernetes mimir namespace"
+  type        = string
+}
+variable "tempo_namespace" {
+  description = "Kubernetes tempo namespace"
   type        = string
 }
 

@@ -51,6 +51,12 @@ variable "loki_service_port" {
   default     = 80
 }
 
+variable "loki_namespace" {
+  description = "Namespace of the Loki service"
+  type        = string
+  default     = "loki"
+}
+
 variable "mimir_service_name" {
   description = "Name of the Mimir nginx service"
   type        = string
@@ -63,6 +69,12 @@ variable "mimir_service_port" {
   default     = 80
 }
 
+variable "mimir_namespace" {
+  description = "Namespace of the Mimir service"
+  type        = string
+  default     = "mimir"
+}
+
 variable "tempo_service_name" {
   description = "Name of the Tempo gateway service"
   type        = string
@@ -73,6 +85,12 @@ variable "tempo_service_port" {
   description = "Port of the Tempo gateway service"
   type        = number
   default     = 80
+}
+
+variable "tempo_namespace" {
+  description = "Namespace of the Tempo service"
+  type        = string
+  default     = "tempo"
 }
 
 variable "enable_mtls" {

@@ -184,7 +184,7 @@ variable "certificates_base_domain" {
 variable "certificates_enable_ingress_tls" {
   description = "Create TLS certificates for ingress endpoints (requires base_domain)"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "certificates_duration" {
@@ -211,3 +211,39 @@ variable "grafana_hostname" {
   default     = ""
 }
 
+# K8s Monitoring Configuration
+variable "k8s_monitoring_enabled" {
+  description = "Enable k8s-monitoring for meta-monitoring of the observability stack"
+  type        = bool
+  default     = true
+}
+
+variable "k8s_monitoring_cluster_name" {
+  description = "Cluster name for k8s-monitoring telemetry labels"
+  type        = string
+  default     = "lgtm-cluster"
+}
+
+variable "k8s_monitoring_scrape_interval" {
+  description = "Scrape interval for k8s-monitoring metrics collection"
+  type        = string
+  default     = "15s"
+}
+
+variable "k8s_monitoring_enable_cluster_events" {
+  description = "Enable cluster events collection in k8s-monitoring"
+  type        = bool
+  default     = true
+}
+
+variable "k8s_monitoring_enable_pod_logs" {
+  description = "Enable pod logs collection in k8s-monitoring"
+  type        = bool
+  default     = true
+}
+
+variable "k8s_monitoring_enable_cluster_metrics" {
+  description = "Enable cluster metrics collection in k8s-monitoring"
+  type        = bool
+  default     = true
+}

@@ -24,6 +24,18 @@ config:
             scrape_interval: 30s
             static_configs:
               - targets: ["0.0.0.0:8889"]
+          - job_name: "loki"
+            scrape_interval: 30s
+            static_configs:
+              - targets: ["0.0.0.0:3100"]
+          - job_name: "mimir"
+            scrape_interval: 30s
+            static_configs:
+              - targets: ["0.0.0.0:9095"]
+          - job_name: "tempo"
+            scrape_interval: 30s
+            static_configs:
+              - targets: ["0.0.0.0:3200"]
   processors:
     batch:
       send_batch_size: 512
@@ -33,27 +45,23 @@ config:
       limit_percentage: 75
       spike_limit_percentage: 15
     resourcedetection/system:
-      # Modify the list of detectors to match the cloud environment
-      detectors: [azure]
+      # Detectors for local k8s cluster
+      detectors: [env, system]
       timeout: 2s
       override: false
   exporters:
     loki:
-      endpoint: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
+      endpoint: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
       tls:
         insecure: true
       headers:
         X-Scope-OrgID: tenant1
     prometheusremotewrite:
-      endpoint: http://mimir-distributor.mimir.svc.cluster.local:8080/api/v1/push
+      endpoint: http://mimir-distributor.observability.svc.cluster.local:8080/api/v1/push
       headers:
         X-Scope-OrgID: tenant1
-    prometheusremotewrite/self-monitoring:
-      endpoint: http://mimir-distributor.mimir.svc.cluster.local:8080/api/v1/push
-      headers:
-        X-Scope-OrgID: meta-monitoring
     otlp/tempo:
-      endpoint: http://tempo-distributor.tempo.svc.cluster.local:4317
+      endpoint: http://tempo-distributor.observability.svc.cluster.local:4317
       tls:
         insecure: true
       headers:
@@ -71,13 +79,9 @@ config:
         processors: [memory_limiter, resourcedetection/system, batch]
         exporters: [loki]
       metrics:
-        receivers: [otlp]
+        receivers: [otlp, prometheus] # Added prometheus receiver for self-monitoring
         processors: [memory_limiter, resourcedetection/system, batch]
         exporters: [prometheusremotewrite]
-      metrics/self-monitoring:
-        receivers: [prometheus]
-        processors: [memory_limiter, batch]
-        exporters: [prometheusremotewrite/self-monitoring]
       traces:
         receivers: [otlp]
         processors: [memory_limiter, resourcedetection/system, batch]

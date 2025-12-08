@@ -43,6 +43,43 @@ resource "time_sleep" "wait_for_ingress_controller" {
   create_duration = "30s"
 }
 
+# Create ExternalName services for cross-namespace access
+resource "kubernetes_service_v1" "loki_proxy" {
+  metadata {
+    name      = "loki-proxy"
+    namespace = var.namespace
+  }
+
+  spec {
+    type          = "ExternalName"
+    external_name = "${var.loki_service_name}.${var.loki_namespace}.svc.cluster.local"
+  }
+}
+
+resource "kubernetes_service_v1" "mimir_proxy" {
+  metadata {
+    name      = "mimir-proxy"
+    namespace = var.namespace
+  }
+
+  spec {
+    type          = "ExternalName"
+    external_name = "${var.mimir_service_name}.${var.mimir_namespace}.svc.cluster.local"
+  }
+}
+
+resource "kubernetes_service_v1" "tempo_proxy" {
+  metadata {
+    name      = "tempo-proxy"
+    namespace = var.namespace
+  }
+
+  spec {
+    type          = "ExternalName"
+    external_name = "${var.tempo_service_name}.${var.tempo_namespace}.svc.cluster.local"
+  }
+}
+
 # Unified Ingress for Observability Services
 resource "kubernetes_ingress_v1" "observability" {
   metadata {
@@ -89,7 +126,7 @@ resource "kubernetes_ingress_v1" "observability" {
 
           backend {
             service {
-              name = var.loki_service_name
+              name = kubernetes_service_v1.loki_proxy.metadata[0].name
               port {
                 number = var.loki_service_port
               }
@@ -104,7 +141,7 @@ resource "kubernetes_ingress_v1" "observability" {
 
           backend {
             service {
-              name = var.mimir_service_name
+              name = kubernetes_service_v1.mimir_proxy.metadata[0].name
               port {
                 number = var.mimir_service_port
               }
@@ -119,7 +156,7 @@ resource "kubernetes_ingress_v1" "observability" {
 
           backend {
             service {
-              name = var.tempo_service_name
+              name = kubernetes_service_v1.tempo_proxy.metadata[0].name
               port {
                 number = var.tempo_service_port
               }
