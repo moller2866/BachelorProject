@@ -51,3 +51,9 @@ variable "grafana_hostname" {
   type        = string
   default     = ""
 }
+
+variable "additional_dns_names" {
+  description = "Additional DNS names to include in the ingress TLS certificate (e.g., IP.nip.io hostnames)"
+  type        = list(string)
+  default     = []
+}

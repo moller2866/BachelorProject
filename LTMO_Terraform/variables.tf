@@ -90,6 +90,12 @@ variable "ingress_class_name" {
   default     = "nginx"
 }
 
+variable "nginx_controller_version" {
+  description = "Version of the NGINX Ingress Controller Helm chart"
+  type        = string
+  default     = "4.11.3"
+}
+
 variable "ingress_host" {
   description = "Optional hostname for the ingress (if using DNS). Leave empty for IP-based access"
   type        = string

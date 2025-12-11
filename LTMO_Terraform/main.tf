@@ -26,6 +26,10 @@ terraform {
       source  = "hashicorp/time"
       version = "~> 0.9"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
     grafana = {
       source  = "grafana/grafana"
       version = "~> 2.6"
@@ -151,6 +155,20 @@ resource "kubernetes_namespace" "otel_collector" {
   depends_on = [module.aks]
 }
 
+# NGINX Ingress Controller - deployed first to get the LoadBalancer IP
+module "nginx_controller" {
+  source = "./modules/nginx-controller"
+
+  namespace          = kubernetes_namespace.observability.metadata[0].name
+  chart_version      = var.nginx_controller_version
+  ingress_class_name = var.ingress_class_name
+
+  depends_on = [
+    module.aks,
+    kubernetes_namespace.observability
+  ]
+}
+
 # cert-manager for certificate management
 module "cert_manager" {
   source = "./modules/cert-manager"
@@ -183,11 +201,38 @@ module "certificates" {
   grafana_hostname         = var.grafana_hostname
   certificate_duration     = var.certificates_duration
   certificate_renew_before = var.certificates_renew_before
+  # Dynamic: use ingress IP from nginx_controller module for nip.io hostname
+  additional_dns_names = var.ingress_host == "" ? [module.nginx_controller.ingress_hostname_nip_io] : []
 
   depends_on = [
     kubernetes_namespace.observability,
-    module.cert_manager
+    module.cert_manager,
+    module.nginx_controller # Depends on nginx_controller to get the IP
   ]
+}
+
+# Wait for cert-manager to fully populate the certificate secrets
+# This ensures the secrets contain actual certificate data before we try to read them
+resource "null_resource" "wait_for_certificates" {
+  count = var.grafana_datasources_enable_mtls ? 1 : 0
+
+  depends_on = [module.certificates]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for Grafana client certificate secret to be ready..."
+      kubectl wait --for=jsonpath='{.data.tls\.crt}' secret/${module.certificates.grafana_client_cert_secret} \
+        -n ${kubernetes_namespace.observability.metadata[0].name} \
+        --timeout=120s
+      
+      echo "Waiting for CA certificate secret to be ready..."
+      kubectl wait --for=jsonpath='{.data.tls\.crt}' secret/${module.cert_manager.ca_secret_name} \
+        -n ${module.cert_manager.namespace} \
+        --timeout=120s
+      
+      echo "All certificate secrets are ready!"
+    EOT
+  }
 }
 
 # Loki Deployment
@@ -256,10 +301,10 @@ module "ingress" {
 
   namespace                = kubernetes_namespace.observability.metadata[0].name
   ingress_class_name       = var.ingress_class_name
-  host                     = var.ingress_host
+  host                     = var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io
   enable_tls               = var.ingress_enable_tls
   tls_secret_name          = var.ingress_tls_secret_name
-  install_nginx_controller = var.ingress_install_nginx_controller
+  install_nginx_controller = false # Controller is now deployed by nginx_controller module
 
   # mTLS configuration
   enable_mtls         = var.ingress_enable_mtls
@@ -280,7 +325,9 @@ module "ingress" {
     module.loki,
     module.mimir,
     module.tempo,
-    module.cert_manager
+    module.cert_manager,
+    module.certificates,      # Wait for TLS certificates to be created
+    module.nginx_controller   # Wait for nginx controller to be ready
   ]
 }
 
@@ -293,7 +340,10 @@ data "kubernetes_secret" "grafana_client_cert" {
     namespace = kubernetes_namespace.observability.metadata[0].name
   }
 
-  depends_on = [module.certificates]
+  depends_on = [
+    module.certificates,
+    null_resource.wait_for_certificates
+  ]
 }
 
 data "kubernetes_secret" "ingress_tls_cert" {
@@ -304,7 +354,10 @@ data "kubernetes_secret" "ingress_tls_cert" {
     namespace = kubernetes_namespace.observability.metadata[0].name
   }
 
-  depends_on = [module.certificates]
+  depends_on = [
+    module.certificates,
+    null_resource.wait_for_certificates
+  ]
 }
 
 data "kubernetes_secret" "ca_cert" {
@@ -315,7 +368,10 @@ data "kubernetes_secret" "ca_cert" {
     namespace = module.cert_manager.namespace
   }
 
-  depends_on = [module.cert_manager]
+  depends_on = [
+    module.cert_manager,
+    null_resource.wait_for_certificates
+  ]
 }
 
 # Grafana provisioning
@@ -326,9 +382,10 @@ provider "grafana" {
 module "grafana-provisioning" {
   source = "./modules/grafana-provisioning"
 
-  loki_url  = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/loki" : "https://${module.ingress.ingress_ip}.nip.io/loki"
-  tempo_url = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/tempo" : "https://${module.ingress.ingress_ip}.nip.io/tempo"
-  mimir_url = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/mimir/prometheus" : "https://${module.ingress.ingress_ip}.nip.io/mimir/prometheus"
+  # Use the dynamic hostname from nginx_controller or the configured ingress_host
+  loki_url  = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/loki"
+  tempo_url = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/tempo"
+  mimir_url = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/mimir/prometheus"
 
   # mTLS configuration
   enable_mtls         = var.grafana_datasources_enable_mtls
@@ -339,6 +396,7 @@ module "grafana-provisioning" {
 
   depends_on = [
     module.ingress,
+    module.nginx_controller,
     data.kubernetes_secret.grafana_client_cert,
     data.kubernetes_secret.ca_cert
   ]

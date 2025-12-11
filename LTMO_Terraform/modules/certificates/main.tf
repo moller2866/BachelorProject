@@ -17,7 +17,7 @@ resource "kubernetes_manifest" "ingress_tls_cert" {
       }
     }
     spec = {
-      secretName  = "observability-tls"
+      secretName  = "observability-ingress-tls"
       duration    = var.certificate_duration
       renewBefore = var.certificate_renew_before
 
@@ -41,8 +41,8 @@ resource "kubernetes_manifest" "ingress_tls_cert" {
       dnsNames = concat(
         # Always include the common name
         [var.ingress_hostname != "" ? var.ingress_hostname : (var.base_domain != "" ? "observability-${var.region_name}.${var.base_domain}" : "observability.local")],
-        # Include wildcard for nip.io if no base domain
-        var.base_domain == "" ? ["*.nip.io"] : []
+        # Include additional DNS names (e.g., IP.nip.io hostnames)
+        var.additional_dns_names
       )
 
       issuerRef = {
