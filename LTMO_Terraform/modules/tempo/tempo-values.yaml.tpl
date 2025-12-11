@@ -31,21 +31,21 @@ tempo:
     "azure.workload.identity/use": "true"
   podAnnotations:
     "azure.workload.identity/client-id": "${workload_identity_client_id}"
+    "prometheus.io/scrape": "true"
+    "prometheus.io/port": "3200"
+    "prometheus.io/path": "/metrics"
 
 # Distributor configuration
 distributor:
   replicas: 1
 
-
 # Ingester configuration
 ingester:
   replicas: 1
 
-
-# Compactor configuration  
+# Compactor configuration
 compactor:
   replicas: 1
-
 
 # Querier configuration
 querier:
@@ -60,7 +60,6 @@ queryFrontend:
 gateway:
   enabled: true
   replicas: 1
-
 
 # Memcached (optional, can be disabled for simple setups)
 memcached:

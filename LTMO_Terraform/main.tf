@@ -26,6 +26,10 @@ terraform {
       source  = "hashicorp/time"
       version = "~> 0.9"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
     grafana = {
       source  = "grafana/grafana"
       version = "~> 2.6"
@@ -84,7 +88,9 @@ module "workload_identity" {
 
   app_display_name           = var.app_display_name
   aks_oidc_issuer_url        = module.aks.oidc_issuer_url
-  namespace                  = var.kubernetes_namespace
+  loki_namespace             = "loki"
+  mimir_namespace            = "mimir"
+  tempo_namespace            = "tempo"
   service_account_name_loki  = var.service_account_name_loki
   service_account_name_mimir = var.service_account_name_mimir
   service_account_name_tempo = var.service_account_name_tempo
@@ -119,6 +125,50 @@ resource "kubernetes_namespace" "observability" {
   depends_on = [module.aks]
 }
 
+resource "kubernetes_namespace" "loki" {
+  metadata {
+    name = "loki"
+  }
+
+  depends_on = [module.aks]
+}
+resource "kubernetes_namespace" "mimir" {
+  metadata {
+    name = "mimir"
+  }
+
+  depends_on = [module.aks]
+}
+resource "kubernetes_namespace" "tempo" {
+  metadata {
+    name = "tempo"
+  }
+
+  depends_on = [module.aks]
+}
+
+resource "kubernetes_namespace" "otel_collector" {
+  metadata {
+    name = "otel-collector"
+  }
+
+  depends_on = [module.aks]
+}
+
+# NGINX Ingress Controller - deployed first to get the LoadBalancer IP
+module "nginx_controller" {
+  source = "./modules/nginx-controller"
+
+  namespace          = kubernetes_namespace.observability.metadata[0].name
+  chart_version      = var.nginx_controller_version
+  ingress_class_name = var.ingress_class_name
+
+  depends_on = [
+    module.aks,
+    kubernetes_namespace.observability
+  ]
+}
+
 # cert-manager for certificate management
 module "cert_manager" {
   source = "./modules/cert-manager"
@@ -129,10 +179,7 @@ module "cert_manager" {
   enable_prometheus_metrics = true
 
   # ClusterIssuer configuration
-  enable_letsencrypt = var.cert_manager_enable_letsencrypt
-  letsencrypt_email  = var.cert_manager_letsencrypt_email
-  letsencrypt_server = var.cert_manager_letsencrypt_server
-  ca_common_name     = var.cert_manager_ca_common_name
+  ca_common_name = var.cert_manager_ca_common_name
 
   depends_on = [
     module.aks,
@@ -154,24 +201,51 @@ module "certificates" {
   grafana_hostname         = var.grafana_hostname
   certificate_duration     = var.certificates_duration
   certificate_renew_before = var.certificates_renew_before
+  # Dynamic: use ingress IP from nginx_controller module for nip.io hostname
+  additional_dns_names = var.ingress_host == "" ? [module.nginx_controller.ingress_hostname_nip_io] : []
 
   depends_on = [
     kubernetes_namespace.observability,
-    module.cert_manager
+    module.cert_manager,
+    module.nginx_controller # Depends on nginx_controller to get the IP
   ]
+}
+
+# Wait for cert-manager to fully populate the certificate secrets
+# This ensures the secrets contain actual certificate data before we try to read them
+resource "null_resource" "wait_for_certificates" {
+  count = var.grafana_datasources_enable_mtls ? 1 : 0
+
+  depends_on = [module.certificates]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for Grafana client certificate secret to be ready..."
+      kubectl wait --for=jsonpath='{.data.tls\.crt}' secret/${module.certificates.grafana_client_cert_secret} \
+        -n ${kubernetes_namespace.observability.metadata[0].name} \
+        --timeout=120s
+      
+      echo "Waiting for CA certificate secret to be ready..."
+      kubectl wait --for=jsonpath='{.data.tls\.crt}' secret/${module.cert_manager.ca_secret_name} \
+        -n ${module.cert_manager.namespace} \
+        --timeout=120s
+      
+      echo "All certificate secrets are ready!"
+    EOT
+  }
 }
 
 # Loki Deployment
 module "loki" {
   source = "./modules/loki"
 
-  namespace                   = kubernetes_namespace.observability.metadata[0].name
+  namespace                   = "loki"
   storage_account_name        = module.storage.storage_account_name
   service_account_name        = var.service_account_name_loki
   workload_identity_client_id = module.workload_identity.app_application_id
 
   depends_on = [
-    kubernetes_namespace.observability,
+    kubernetes_namespace.loki,
     module.workload_identity
   ]
 }
@@ -180,11 +254,11 @@ module "loki" {
 module "otel_collector" {
   source = "./modules/otel-collector"
 
-  namespace        = kubernetes_namespace.observability.metadata[0].name
+  namespace        = "otel-collector"
   helm_values_file = "${path.root}/modules/otel-collector/otel-collector-values.yaml"
 
   depends_on = [
-    kubernetes_namespace.observability,
+    kubernetes_namespace.otel_collector,
     module.loki,
     module.mimir,
     module.tempo
@@ -195,13 +269,13 @@ module "otel_collector" {
 module "mimir" {
   source = "./modules/mimir"
 
-  namespace                   = kubernetes_namespace.observability.metadata[0].name
+  namespace                   = "mimir"
   storage_account_name        = module.storage.storage_account_name
   service_account_name        = var.service_account_name_mimir
   workload_identity_client_id = module.workload_identity.app_application_id
 
   depends_on = [
-    kubernetes_namespace.observability,
+    kubernetes_namespace.mimir,
     module.workload_identity
   ]
 }
@@ -210,13 +284,13 @@ module "mimir" {
 module "tempo" {
   source = "./modules/tempo"
 
-  namespace                   = kubernetes_namespace.observability.metadata[0].name
+  namespace                   = "tempo"
   storage_account_name        = module.storage.storage_account_name
   service_account_name        = var.service_account_name_tempo
   workload_identity_client_id = module.workload_identity.app_application_id
 
   depends_on = [
-    kubernetes_namespace.observability,
+    kubernetes_namespace.tempo,
     module.workload_identity
   ]
 }
@@ -227,10 +301,10 @@ module "ingress" {
 
   namespace                = kubernetes_namespace.observability.metadata[0].name
   ingress_class_name       = var.ingress_class_name
-  host                     = var.ingress_host
+  host                     = var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io
   enable_tls               = var.ingress_enable_tls
   tls_secret_name          = var.ingress_tls_secret_name
-  install_nginx_controller = var.ingress_install_nginx_controller
+  install_nginx_controller = false # Controller is now deployed by nginx_controller module
 
   # mTLS configuration
   enable_mtls         = var.ingress_enable_mtls
@@ -251,7 +325,9 @@ module "ingress" {
     module.loki,
     module.mimir,
     module.tempo,
-    module.cert_manager
+    module.cert_manager,
+    module.certificates,      # Wait for TLS certificates to be created
+    module.nginx_controller   # Wait for nginx controller to be ready
   ]
 }
 
@@ -264,7 +340,24 @@ data "kubernetes_secret" "grafana_client_cert" {
     namespace = kubernetes_namespace.observability.metadata[0].name
   }
 
-  depends_on = [module.certificates]
+  depends_on = [
+    module.certificates,
+    null_resource.wait_for_certificates
+  ]
+}
+
+data "kubernetes_secret" "ingress_tls_cert" {
+  count = var.ingress_enable_tls ? 1 : 0
+
+  metadata {
+    name      = module.certificates.ingress_tls_secret
+    namespace = kubernetes_namespace.observability.metadata[0].name
+  }
+
+  depends_on = [
+    module.certificates,
+    null_resource.wait_for_certificates
+  ]
 }
 
 data "kubernetes_secret" "ca_cert" {
@@ -275,7 +368,10 @@ data "kubernetes_secret" "ca_cert" {
     namespace = module.cert_manager.namespace
   }
 
-  depends_on = [module.cert_manager]
+  depends_on = [
+    module.cert_manager,
+    null_resource.wait_for_certificates
+  ]
 }
 
 # Grafana provisioning
@@ -286,9 +382,10 @@ provider "grafana" {
 module "grafana-provisioning" {
   source = "./modules/grafana-provisioning"
 
-  loki_url  = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/loki" : "https://${module.ingress.ingress_ip}.nip.io/loki"
-  tempo_url = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/tempo" : "https://${module.ingress.ingress_ip}.nip.io/tempo"
-  mimir_url = module.ingress.ingress_host != "IP-based access" ? "https://${module.ingress.ingress_host}/mimir/prometheus" : "https://${module.ingress.ingress_ip}.nip.io/mimir/prometheus"
+  # Use the dynamic hostname from nginx_controller or the configured ingress_host
+  loki_url  = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/loki"
+  tempo_url = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/tempo"
+  mimir_url = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/mimir/prometheus"
 
   # mTLS configuration
   enable_mtls         = var.grafana_datasources_enable_mtls
@@ -299,9 +396,34 @@ module "grafana-provisioning" {
 
   depends_on = [
     module.ingress,
+    module.nginx_controller,
     data.kubernetes_secret.grafana_client_cert,
     data.kubernetes_secret.ca_cert
   ]
 
+}
+
+# K8s Monitoring for meta-monitoring of the observability stack
+module "k8s_monitoring" {
+  count  = var.k8s_monitoring_enabled ? 1 : 0
+  source = "./modules/k8s-monitoring"
+
+  namespace = kubernetes_namespace.observability.metadata[0].name
+
+  # Chart configuration
+  cluster_name    = var.k8s_monitoring_cluster_name
+  scrape_interval = var.k8s_monitoring_scrape_interval
+
+  # Feature toggles
+  enable_cluster_events  = var.k8s_monitoring_enable_cluster_events
+  enable_pod_logs        = var.k8s_monitoring_enable_pod_logs
+  enable_cluster_metrics = var.k8s_monitoring_enable_cluster_metrics
+
+  depends_on = [
+    kubernetes_namespace.observability,
+    module.loki,
+    module.mimir,
+    module.tempo
+  ]
 }
 

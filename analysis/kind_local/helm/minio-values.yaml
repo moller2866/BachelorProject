@@ -1,0 +1,53 @@
+replicas: 1
+drivesPerNode: 2
+rootUser: root-user
+rootPassword: supersecretpassword
+
+users:
+  - accessKey: loki-user
+    secretKey: supersecretpassword
+    policy: readwrite
+  - accessKey: tempo-user
+    secretKey: supersecretpassword
+    policy: readwrite
+  - accessKey: mimir-user
+    secretKey: supersecretpassword
+    policy: readwrite
+
+buckets:
+  # Loki buckets
+  - name: loki-chunks
+    policy: none
+    purge: false
+  - name: loki-ruler
+    policy: none
+    purge: false
+  - name: loki-admin
+    policy: none
+    purge: false
+  # Tempo buckets
+  - name: tempo-traces
+    policy: none
+    purge: false
+  # Mimir buckets
+  - name: mimir-blocks
+    policy: none
+    purge: false
+  - name: mimir-ruler
+    policy: none
+    purge: false
+  - name: mimir-alertmanager
+    policy: none
+    purge: false
+
+persistence:
+  size: 20Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+service:
+  type: ClusterIP
+  port: 9000

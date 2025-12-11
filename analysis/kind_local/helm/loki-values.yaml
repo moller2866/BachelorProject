@@ -1,24 +1,13 @@
 loki:
-  podLabels:
-    "azure.workload.identity/use": "true"
-  podAnnotations:
-    "prometheus.io/scrape": "true"
-    "prometheus.io/port": "3100"
-    "prometheus.io/path": "/metrics"
   schemaConfig:
     configs:
       - from: "2024-04-01"
         store: tsdb
-        object_store: azure
+        object_store: s3
         schema: v13
         index:
           prefix: loki_index_
           period: 24h
-  storage_config:
-    azure:
-      account_name: "${storage_account_name}"
-      container_name: "${loki_chunk_container}"
-      use_federated_token: true
   ingester:
     chunk_encoding: snappy
   pattern_ingester:
@@ -29,35 +18,23 @@ loki:
     retention_period: 672h # 28 days retention
   compactor:
     retention_enabled: true
-    delete_request_store: azure
-  ruler:
-    enable_api: true
-    storage:
-      type: azure
-      azure:
-        account_name: "${storage_account_name}"
-        container_name: "${loki_ruler_container}"
-        use_federated_token: true
-      alertmanager_url: http://prom:9093
+    delete_request_store: filesystem
 
   querier:
     max_concurrent: 4
 
   storage:
-    type: azure
+    type: s3
     bucketNames:
-      chunks: "${loki_chunk_container}"
-      ruler: "${loki_ruler_container}"
-    azure:
-      accountName: "${storage_account_name}"
-      useFederatedToken: true
-
-serviceAccount:
-  name: "${service_account_name}"
-  annotations:
-    "azure.workload.identity/client-id": "${workload_identity_client_id}"
-  labels:
-    "azure.workload.identity/use": "true"
+      chunks: loki-chunks
+      ruler: loki-ruler
+      admin: loki-admin
+    s3:
+      endpoint: minio.observability.svc.cluster.local:9000
+      secretAccessKey: supersecretpassword
+      accessKeyId: loki-user
+      s3ForcePathStyle: true
+      insecure: true
 
 deploymentMode: Distributed
 auth_enabled: false

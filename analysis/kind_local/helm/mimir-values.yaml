@@ -1,0 +1,81 @@
+mimir:
+  structuredConfig:
+    common:
+      storage:
+        backend: s3
+        s3:
+          endpoint: minio.observability.svc.cluster.local:9000
+          bucket_name: mimir-blocks
+          access_key_id: mimir-user
+          secret_access_key: supersecretpassword
+          insecure: true
+
+    blocks_storage:
+      backend: s3
+      s3:
+        endpoint: minio.observability.svc.cluster.local:9000
+        bucket_name: mimir-blocks
+        access_key_id: mimir-user
+        secret_access_key: supersecretpassword
+        insecure: true
+
+    ruler_storage:
+      backend: s3
+      s3:
+        endpoint: minio.observability.svc.cluster.local:9000
+        bucket_name: mimir-ruler
+        access_key_id: mimir-user
+        secret_access_key: supersecretpassword
+        insecure: true
+
+    alertmanager_storage:
+      backend: s3
+      s3:
+        endpoint: minio.observability.svc.cluster.local:9000
+        bucket_name: mimir-alertmanager
+        access_key_id: mimir-user
+        secret_access_key: supersecretpassword
+        insecure: true
+
+minio:
+  enabled: false
+ruler:
+  enabled: false
+alertmanager:
+  enabled: false
+nginx:
+  enabled: true
+
+compactor:
+  replicas: 1
+
+store_gateway:
+  replicas: 1
+
+ingester:
+  replicas: 1
+
+distributor:
+  replicas: 2
+
+query_frontend:
+  replicas: 1
+
+query_scheduler:
+  replicas: 1
+
+querier:
+  replicas: 2
+
+chunks-cache:
+  enabled: false
+
+memcached:
+  enabled: false
+
+# Disable local persistence since we're using S3
+persistence:
+  enabled: false
+
+serviceMonitor:
+  enabled: true

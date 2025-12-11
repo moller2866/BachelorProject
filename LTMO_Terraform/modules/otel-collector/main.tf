@@ -5,6 +5,7 @@ resource "helm_release" "otel_collector" {
   chart      = "opentelemetry-collector"
   namespace  = var.namespace
   version    = "0.136.0" # Specify version for consistency
+  timeout    = 120
 
   values = [
     file(var.helm_values_file)
