@@ -26,6 +26,7 @@ resource "grafana_data_source" "loki" {
   json_data_encoded = jsonencode({
     tlsAuth           = var.enable_mtls
     tlsAuthWithCACert = var.enable_mtls
+    tlsSkipVerify     = var.tls_skip_verify
   })
 }
 
@@ -48,6 +49,7 @@ resource "grafana_data_source" "loki-monitoring" {
   json_data_encoded = jsonencode({
     tlsAuth           = var.enable_mtls
     tlsAuthWithCACert = var.enable_mtls
+    tlsSkipVerify     = var.tls_skip_verify
   })
 }
 
@@ -69,6 +71,7 @@ resource "grafana_data_source" "tempo" {
   json_data_encoded = jsonencode({
     tlsAuth           = var.enable_mtls
     tlsAuthWithCACert = var.enable_mtls
+    tlsSkipVerify     = var.tls_skip_verify
 
     # ---------------------------
     # Trace to Logs configuration
@@ -120,6 +123,7 @@ resource "grafana_data_source" "mimir" {
     prometheusVersion = "2.9.1"
     tlsAuth           = var.enable_mtls
     tlsAuthWithCACert = var.enable_mtls
+    tlsSkipVerify     = var.tls_skip_verify
   })
 }
 resource "grafana_data_source" "mimir-monitoring" {
@@ -143,6 +147,7 @@ resource "grafana_data_source" "mimir-monitoring" {
     prometheusVersion = "2.9.1"
     tlsAuth           = var.enable_mtls
     tlsAuthWithCACert = var.enable_mtls
+    tlsSkipVerify     = var.tls_skip_verify
   })
 }
 # Dashboard provisioning for LGTM stack monitoring

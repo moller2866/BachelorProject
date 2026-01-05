@@ -87,4 +87,4 @@ grafana_datasources_enable_mtls = true
 
 # Skip TLS server certificate verification (useful for self-signed certificates)
 # Set to false when using Let's Encrypt or other publicly-trusted CAs
-grafana_datasources_tls_skip_verify = true
+grafana_datasources_tls_skip_verify = false
