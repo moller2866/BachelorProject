@@ -36,7 +36,7 @@ spec:
             - name: ASPNETCORE_URLS
               value: http://+:8080
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://otel-collector-opentelemetry-collector.observability:4317
+              value: http://otel-collector-opentelemetry-collector.otel-collector:4317
             - name: OTEL_SERVICE_NAME
               value: aspire-test-api
             - name: ENABLE_SWAGGER

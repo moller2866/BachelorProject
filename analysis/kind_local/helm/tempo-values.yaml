@@ -1,0 +1,60 @@
+# Configuration for tempo-distributed chart
+traces:
+  otlp:
+    grpc:
+      enabled: true
+    http:
+      enabled: true
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo-traces
+      endpoint: minio.observability.svc.cluster.local:9000
+      access_key: tempo-user
+      secret_key: supersecretpassword
+      insecure: true
+
+# Distributor configuration
+distributor:
+  replicas: 2
+
+# Ingester configuration
+ingester:
+  replicas: 2
+
+# Compactor configuration
+compactor:
+  replicas: 2
+
+# Querier configuration
+querier:
+  replicas: 2
+# Query Frontend configuration
+queryFrontend:
+  enabled: true
+  http_listen_port: 3200
+
+# Gateway configuration (for tempo-distributed)
+gateway:
+  enabled: true
+  replicas: 1
+
+# Memcached (optional, can be disabled for simple setups)
+memcached:
+  enabled: false
+
+minio:
+  enabled: false
+
+# Tempo global configuration
+tempo:
+  multitenancyEnabled: false
+  metricsGenerator:
+    enabled: false
+  ingester:
+    max_block_duration: 10m
+
+serviceMonitor:
+  enabled: true

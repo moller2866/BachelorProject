@@ -23,6 +23,10 @@ mimir:
       azure:
         account_name: "${storage_account_name}"
         container_name: "${mimir_blocks_container}"
+  podAnnotations:
+    "prometheus.io/scrape": "true"
+    "prometheus.io/port": "8080"
+    "prometheus.io/path": "/metrics"
 
 minio:
   enabled: false
@@ -65,4 +69,4 @@ persistence:
   size: 20Gi
 
 serviceMonitor:
-  enabled: false
+  enabled: true

@@ -58,17 +58,17 @@ output "tempo_traces_container" {
 
 output "loki_url" {
   description = "URL to access Loki via the unified ingress"
-  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/loki" : "http://${module.ingress.ingress_ip}.nip.io/loki"
+  value       = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/loki"
 }
 
 output "mimir_url" {
   description = "URL to access Mimir (Prometheus-compatible) via the unified ingress"
-  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/mimir" : "http://${module.ingress.ingress_ip}.nip.io/mimir"
+  value       = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/mimir"
 }
 
 output "tempo_url" {
   description = "URL to access Tempo via the unified ingress"
-  value       = module.ingress.ingress_host != "IP-based access" ? "http://${module.ingress.ingress_host}/tempo" : "http://${module.ingress.ingress_ip}.nip.io/tempo"
+  value       = "https://${var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io}/tempo"
 }
 
 # cert-manager outputs
@@ -105,7 +105,12 @@ output "grafana_client_cert_secret" {
 
 output "observability_ingress_hostname" {
   description = "Hostname for the unified observability ingress"
-  value       = module.certificates.ingress_hostname
+  value       = var.ingress_host != "" ? var.ingress_host : module.nginx_controller.ingress_hostname_nip_io
+}
+
+output "ingress_ip" {
+  description = "LoadBalancer IP address of the ingress controller"
+  value       = module.nginx_controller.ingress_ip
 }
 
 # mTLS Configuration outputs
